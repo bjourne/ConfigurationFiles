@@ -1,0 +1,407 @@
+(require 'cl)
+
+(setq is-windows (string-equal system-type "windows-nt"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; dired customization
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-hook 'dired-load-hook
+          (function (lambda () (load "dired-x"))))
+
+;; This shouldn't work on Windows
+(setq dired-listing-switches "-al --group-directories-first")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ido!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
+(ido-mode t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; org-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq org-src-fontify-natively t
+      org-export-htmlize-output-type 'css)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; OS specific configuration.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(if is-windows
+    (progn (setq default-directory "C:\\")
+           (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\"))
+  (progn (add-to-list 'load-path (expand-file-name "~/.site-lisp/"))
+         (setq auto-save-file-name-transforms
+               '(("\\`/[^/]*:\\(.+/\\)*\\(.*\\)"
+                  "/tmp/\\2" t)
+                 ("\\`/?\\([^/]*/\\)*\\([^/]*\\)\\'"
+                  "/tmp/\\2" t)))
+         (setq auto-save-default nil)))
+
+(defmacro with-library (symbol &rest body)
+  `(condition-case nil
+       (progn
+	 (require ', symbol)
+	 ,@body)
+     (error
+      (message (format "I guess we don't have %s available." ',symbol))
+      nil)))
+(put 'with-library 'lisp-indent-function 1)
+
+;; Package management
+(with-library package
+  (add-to-list 'package-archives
+	       '("marmalade" .
+		 "http://marmalade-repo.org/packages/"))
+  (add-to-list 'package-archives
+               '("melpa" .
+                 "http://melpa.milkbox.net/packages/"))
+  (package-initialize))
+
+(mapcar 'package-install
+        (remove-if 'package-installed-p
+                   '(nrepl
+                     htmlize
+                     clojure-mode
+                     clojure-test-mode
+                     color-theme-solarized
+                     haskell-mode
+                     markdown-mode)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun config-auto-modes ()
+  "Setup lots of modes based on extensions."
+  (add-to-list 'auto-mode-alist '("samba\\.conf\\'" . samba-generic-mode))
+  (add-to-list 'auto-mode-alist '("smb\\.conf" . samba-generic-mode))
+
+  (add-to-list 'auto-mode-alist '("70-install-asterisk" . cfengine-mode))
+
+  (add-to-list 'auto-mode-alist '("SConstruct" . python-mode))
+  (add-to-list 'auto-mode-alist '("SConscript" . python-mode))
+  (add-to-list 'auto-mode-alist '(".jhbuildrc" . python-mode))
+
+  (add-to-list 'auto-mode-alist '("access\\.conf\\'" . apache-mode))
+  (add-to-list 'auto-mode-alist '("apache2\\.conf\\'" . apache-mode))
+  (add-to-list 'auto-mode-alist '("httpd\\.conf\\'" . apache-mode))
+  (add-to-list 'auto-mode-alist
+               '("sites-\\(available\\|enabled\\)/" . apache-mode))
+  (add-to-list 'auto-mode-alist '("srm\\.conf\\'"    . apache-mode))
+  (add-to-list 'auto-mode-alist '(".htaccess"   . apache-mode))
+
+  (add-to-list 'auto-mode-alist '("\\.conf\\'" . sh-mode))
+
+  (add-to-list 'auto-mode-alist '("\\.kid\\'" . html-mode))
+  (add-to-list 'auto-mode-alist '("\\.tmpl\\'" . html-mode))
+
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+  (add-to-list 'auto-mode-alist '("\\.json\\'" . javascript-mode))
+
+  (add-to-list 'auto-mode-alist '("\\.css\\'" . css-mode))
+
+  (add-to-list 'auto-mode-alist '("extensions\\.conf\\'" . conf-windows-mode))
+  (add-to-list 'auto-mode-alist '("dot-emacs$" . emacs-lisp-mode))
+  (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+  ;; markdown
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+  ;; zsh
+  (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
+  )
+
+(defun config-nxml-mode ()
+  (add-to-list 'load-path "c:/.emacs.d/my-packages/nxml-mode-20041004")
+  (add-to-list 'auto-mode-alist
+               (cons (concat "\\." (regexp-opt '("xml" "xsd") t) "\\'")
+                     'nxml-mode))
+  (setq magic-mode-alist
+	(cons '("<\\?xml " . nxml-mode)
+	      magic-mode-alist))
+  (fset 'xml-mode 'nxml-mode)
+  (fset 'html-mode 'nxml-mode)
+
+  ;; Customizing
+  (add-hook 'nxml-mode-hook
+	    '(lambda()
+	       (set-face-foreground 'nxml-attribute-local-name-face "#bb6600")
+               (set-face-foreground 'nxml-processing-instruction-delimiter-face "purple")
+               (set-face-foreground 'nxml-processing-instruction-target-face "purple")
+               (set-face-foreground 'nxml-attribute-value-delimiter-face "RosyBrown")
+               (set-face-foreground 'nxml-attribute-value-face "RosyBrown")))
+               
+  
+  (setq nxml-child-indent 4))
+
+(defun config-javascript-mode ()
+  (autoload 'javascript-mode "javascript" nil t))
+  
+(defun config-css-mode ()
+  (with-library css-mode
+    (setq cssm-mirror-mode nil)
+    (setq cssm-indent-function #'cssm-c-style-indenter)
+    (setq cssm-indent-level 4)))
+
+(defun config-global-keybindings ()
+  ;; Set some keyboard shortcuts
+  (global-set-key "\M-g" 'goto-line)
+  (global-set-key [f9] 'compile)
+  (global-set-key (kbd "M-<return>") 'complete-tag)
+
+  ;; Dabbrev stuff
+  (global-set-key "\C-h" 'hippie-expand)
+
+  ;; comment-dwim on C-c c
+  (global-set-key (kbd "C-c c") 'comment-dwim)
+
+  ;; Basic stuff
+  (global-set-key "\C-z" 'undo)
+  (global-set-key "\C-?" 'backward-delete-char-untabify)
+  (global-set-key [delete] 'delete-horizontal-space-forward)
+  (global-set-key (kbd "C-c m") 'rename-file-and-buffer))
+
+(defun config-emacs-frame ()
+  (setq frame-title-format "%b")
+  (setq icon-title-format frame-title-format))
+
+(defun config-auto-insert-mode ()
+  (require 'autoinsert)
+  (auto-insert-mode)
+  (setq auto-insert-directory "~/.site-lisp/templates/")
+  (setq auto-insert-query nil)
+  (define-auto-insert "\.py" "python-template.py"))
+
+(defun remove-widgets ()
+  "Remove unneeded widgets"
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (setq inhibit-splash-screen t))
+
+(defun config-session ()
+  (with-library session
+    (add-hook 'after-init-hook 'session-initialize)))
+
+(defun config-powershell-mode()
+  (with-library powershell-mode
+    (add-to-list 'auto-mode-alist '("\\.ps1\\'" . powershell-mode))
+    (add-to-list 'auto-mode-alist '("\\.psm1\\'" . powershell-mode))))
+
+(defun config-default-font()
+  (set-default-font
+   (if is-windows "Terminus-12" "Terminus-12")))
+
+(config-auto-insert-mode)
+(config-emacs-frame)
+(remove-widgets)
+
+;; This library is new in emacs 22 I think and gives me lots of
+;; goodies. etc-fstab-generic-mode for example!
+(load-library "generic-x")
+
+;; Colors
+(global-font-lock-mode t)
+
+;; Mouse wheel
+(mouse-wheel-mode t)
+
+;; Minor modes I like
+(column-number-mode t)
+
+;; Setup tab-stop-list
+(setq tab-stop-list
+      (let ((i 4) list)
+        (while (< i 80)
+          (setq list (cons i list))
+          (setq i (+ i 4)))
+        (reverse list)))
+
+(config-default-font)
+
+;; Make text selections visible
+(transient-mark-mode t)
+
+;; Make it so yanked text is placed in xorg's clipboard buffer.
+(setq x-select-enable-clipboard t)
+
+(config-auto-modes)
+
+;; Make it so tab indents in sgml-mode
+(require 'sgml-mode)
+(define-key sgml-mode-map "\t" 'tab-to-tab-stop)
+
+;; emacs-lisp-mode
+(define-key emacs-lisp-mode-map "\C-t" 'lisp-complete-symbol)
+
+(with-library apache-mode)
+
+(config-css-mode)
+
+;; Setup html-mode
+(define-key html-mode-map "\t" 'indent-according-to-mode)
+
+(config-javascript-mode)
+(config-powershell-mode)
+(config-nxml-mode)
+
+
+;; Setup c-indentation
+(require 'cc-mode)
+(setq tab-width 4)
+(setq-default indent-tabs-mode nil)
+(setq c-basic-offset 4)
+(c-set-offset 'substatement-open 0)
+
+;; Make the autosaves go away
+(setq backup-by-copying t      ; don't clobber symlinks
+      backup-directory-alist
+      '(("." . "~/.saves"))    ; don't litter my fs tree
+      delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)       ; use versioned backups
+
+;; This should make *.~[:d:]~ files created by vc-mode also go away
+(vc-stay-local-p nil)
+
+;; Better editing
+(setq kill-whole-line t)
+
+(setq backward-delete-char-untabify-method 'all)
+
+(defun delete-horizontal-space-forward()
+  (interactive "*")
+  (setq first-point (point))
+  (setq next-point (progn (skip-chars-forward " \t\n") (point)))
+  (if (eq first-point next-point)
+      (delete-char 1)
+    (delete-region first-point next-point))
+  )
+
+(defun havoc-c-style()
+  "This mode is to be used when editing Metacity source code."
+  (interactive)
+  (c-set-style "gnu")
+  (c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist)
+  (setq indent-tabs-mode nil)
+  (call-interactively 'untabify))
+
+(defun epiphany-c-style()
+  "This mode is used when editing Epiphany source code."
+  (interactive)
+  (setq indent-tabs-mode t))
+
+(defun nagy-python-style()
+  "This mode is used for waf code."
+  (interactive)
+  (setq python-indent 4)
+  (setq tab-width 4)
+  (setq indent-tabs-mode t))
+
+(defun config-jinja2-mode ()
+  (with-library jinja2-mode ()))
+
+;; End files with newlines
+(setq require-final-newline t)
+(setq next-line-add-newlines nil)
+
+;; Makes it so the pointer returns to the position it was in last time
+;; the file was open.
+(require 'saveplace)
+(setq-default save-place t)
+
+(config-session)
+
+(config-jinja2-mode)
+
+;; Setup personal info. This is to make ChangeLog mode work
+(setq user-mail-address "bjourne@gmail.com")
+(setq user-full-name "Björn Lindqvist")
+
+;; Better uniquify
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
+
+(defun rename-file-and-buffer (new-name)
+  "Renames both current buffer and file it's visiting to NEW-NAME."
+  (interactive "FMove to file: ")
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
+    (if (not filename)
+        (message "Buffer '%s' is not visiting a file!" name)
+      (if (get-buffer new-name)
+          (message "A buffer named '%s' already exists!" new-name)
+        (progn
+          (rename-file name new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil))))))
+
+(defun pretty-print-xml-region (begin end)
+  "Pretty format XML markup in region. You need to have nxml-mode
+http://www.emacswiki.org/cgi-bin/wiki/NxmlMode installed to do
+this.  The function inserts linebreaks to separate tags that have
+nothing but whitespace between them.  It then indents the markup
+by using nxml's indentation rules."
+  (interactive "r")
+  (save-excursion
+    (goto-char begin)
+    (while (search-forward-regexp "\>[ \\t]*\<" nil t)
+      (backward-char) (insert "\n"))
+    (indent-region begin end))
+  (message "Ah, much better!"))
+
+;; Graphviz-mode
+(with-library graphviz-dot-mode)
+
+;; Keybindings
+(config-global-keybindings)
+
+;; Improves performance on Windows
+(setq w32-get-true-file-attributes nil)
+
+;; Coffee!!!
+(with-library coffee-mode)
+
+;; Theme
+(load-theme 'solarized-dark t)
+
+;; Jade, Sws and Stylus modes
+(with-library sws-mode)
+(with-library jade-mode
+  (add-to-list 'auto-mode-alist '("\\.jade$" . jade-mode)))
+(with-library stylus-mode
+  (add-to-list 'auto-mode-alist '("\\.styl$" . stylus-mode)))
+
+(setq read-buffer-completion-ignore-case t)
+(setq read-file-name-completion-ignore-case t)
+
+
+(put 'downcase-region 'disabled nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Frame configuration
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when is-windows (w32-send-sys-command 61488))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Files to open
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(mapcar
+ 'find-file
+ (let
+     ((open-files
+       (if is-windows
+           '("C:/p"
+             ["/v/emacs/dot-emacs"
+              "/v/articles/things-id-like-to-know.txt"
+              "/c/clj/mediawiki-parser/src/mediawiki_parser/downloader.clj"])
+         '("~/svn.bjourne.webfactional.com"
+           ["/emacs/dot-emacs"
+            "/articles/things-id-like-to-know.txt"]))))
+   (mapcar (lambda (x) (concat (car open-files) x))
+           (car (cdr open-files)))))
+
+             
+
+
+
