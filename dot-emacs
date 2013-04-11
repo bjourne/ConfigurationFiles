@@ -64,6 +64,7 @@
                    '(nrepl
                      htmlize
                      clojure-mode
+                     clojurescript-mode
                      clojure-test-mode
                      color-theme-solarized
                      haskell-mode
@@ -128,13 +129,13 @@
                (set-face-foreground 'nxml-processing-instruction-target-face "purple")
                (set-face-foreground 'nxml-attribute-value-delimiter-face "RosyBrown")
                (set-face-foreground 'nxml-attribute-value-face "RosyBrown")))
-               
-  
+
+
   (setq nxml-child-indent 4))
 
 (defun config-javascript-mode ()
   (autoload 'javascript-mode "javascript" nil t))
-  
+
 (defun config-css-mode ()
   (with-library css-mode
     (setq cssm-mirror-mode nil)
@@ -362,8 +363,10 @@ by using nxml's indentation rules."
 ;; Coffee!!!
 (with-library coffee-mode)
 
-;; Theme
-(load-theme 'solarized-dark t)
+;; Theme, possibly a different init should be used on windows.
+(require 'color-theme)
+(require 'color-theme-solarized)
+(color-theme-solarized-dark)
 
 ;; Jade, Sws and Stylus modes
 (with-library sws-mode)
@@ -396,12 +399,11 @@ by using nxml's indentation rules."
               "/v/articles/things-id-like-to-know.txt"
               "/c/clj/mediawiki-parser/src/mediawiki_parser/downloader.clj"])
          '("~/svn.bjourne.webfactional.com"
-           ["/emacs/dot-emacs"
-            "/articles/things-id-like-to-know.txt"]))))
+           ["/articles/things-id-like-to-know.txt"]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
 
-             
+
 
 
 
