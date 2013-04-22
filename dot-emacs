@@ -12,6 +12,12 @@
 (setq dired-listing-switches "-al --group-directories-first")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Stuff to put in path
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when is-windows 
+  (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq ido-enable-flex-matching t)
@@ -23,7 +29,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq org-src-fontify-natively t
       org-export-htmlize-output-type 'css)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
@@ -369,6 +374,20 @@ by using nxml's indentation rules."
 (put 'downcase-region 'disabled nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Factor
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'load-path "C:\\factor\\misc\\fuel\\")
+(setq fuel-factor-root-dir "C:\\factor")
+(require 'factor-mode)
+(add-to-list 'auto-mode-alist '("\\.factor\\'" . factor-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Haskell
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(custom-set-variables
+     '(haskell-mode-hook '(turn-on-haskell-indentation)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (global-font-lock-mode t)
@@ -400,8 +419,7 @@ by using nxml's indentation rules."
        (if is-windows
            '("C:/p"
              ["/pubwork/ConfigurationFiles/dot-emacs"
-              "/v/articles/things-id-like-to-know.txt"
-              "/c/clj/mediawiki-parser/src/mediawiki_parser/downloader.clj"])
+              "/v/articles/things-id-like-to-know.txt"])
          '("~/svn.bjourne.webfactional.com"
            ["/emacs/dot-emacs"
             "/articles/things-id-like-to-know.txt"]))))
