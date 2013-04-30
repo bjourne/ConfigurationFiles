@@ -12,6 +12,12 @@
 (setq dired-listing-switches "-al --group-directories-first")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Stuff to put in path
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when is-windows
+  (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq ido-enable-flex-matching t)
@@ -23,7 +29,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq org-src-fontify-natively t
       org-export-htmlize-output-type 'css)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
@@ -187,10 +192,6 @@
     (add-to-list 'auto-mode-alist '("\\.ps1\\'" . powershell-mode))
     (add-to-list 'auto-mode-alist '("\\.psm1\\'" . powershell-mode))))
 
-(defun config-default-font()
-  (set-default-font
-   (if is-windows "Terminus-12" "Terminus-12")))
-
 (config-auto-insert-mode)
 (config-emacs-frame)
 (remove-widgets)
@@ -198,9 +199,6 @@
 ;; This library is new in emacs 22 I think and gives me lots of
 ;; goodies. etc-fstab-generic-mode for example!
 (load-library "generic-x")
-
-;; Colors
-(global-font-lock-mode t)
 
 ;; Mouse wheel
 (mouse-wheel-mode t)
@@ -216,7 +214,7 @@
           (setq i (+ i 4)))
         (reverse list)))
 
-(config-default-font)
+
 
 ;; Make text selections visible
 (transient-mark-mode t)
@@ -360,13 +358,6 @@ by using nxml's indentation rules."
 ;; Improves performance on Windows
 (setq w32-get-true-file-attributes nil)
 
-;; Coffee!!!
-(with-library coffee-mode)
-
-;; Theme, possibly a different init should be used on windows.
-(require 'color-theme)
-(require 'color-theme-solarized)
-(color-theme-solarized-dark)
 
 ;; Jade, Sws and Stylus modes
 (with-library sws-mode)
@@ -382,10 +373,53 @@ by using nxml's indentation rules."
 (put 'downcase-region 'disabled nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Strip trailing whitespace on save
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(load-file "/opt/factor/misc/fuel/fu.el")
+(add-to-list 'auto-mode-alist '("\\.factor\\'" . factor-mode))
+(if is-windows
+    ((add-to-list 'load-path "C:\\factor\\misc\\fuel\\")
+     (setq fuel-factor-root-dir "C:\\factor"))
+  (load-file "/opt/factor/misc/fuel/fu.el"))
 (require 'factor-mode)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CoffeeScript
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(with-library coffee-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Haskell
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(custom-set-variables
+     '(haskell-mode-hook '(turn-on-haskell-indentation)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Theme, fonts and faces.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Theme, possibly a different init should be used on windows.
+(require 'color-theme)
+(require 'color-theme-solarized)
+(color-theme-solarized-dark)
+
+(global-font-lock-mode t)
+(set-default-font "Terminus-12")
+(load-theme 'solarized-dark t)
+
+(custom-set-variables)
+(custom-set-faces
+ '(font-lock-constant-face
+   ((t
+     (:foreground "#d33682"
+                  :inverse-video nil
+                  :underline nil
+                  :slant normal
+                  :weight normal)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Frame configuration
@@ -401,15 +435,9 @@ by using nxml's indentation rules."
      ((open-files
        (if is-windows
            '("C:/p"
-             ["/v/emacs/dot-emacs"
-              "/v/articles/things-id-like-to-know.txt"
-              "/c/clj/mediawiki-parser/src/mediawiki_parser/downloader.clj"])
+             ["/pubwork/ConfigurationFiles/dot-emacs"
+              "/v/articles/things-id-like-to-know.txt"])
          '("~/svn.bjourne.webfactional.com"
            ["/articles/things-id-like-to-know.txt"]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
-
-
-
-
-
