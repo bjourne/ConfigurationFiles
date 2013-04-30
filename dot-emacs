@@ -14,7 +14,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Stuff to put in path
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when is-windows 
+(when is-windows
   (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -133,13 +133,13 @@
                (set-face-foreground 'nxml-processing-instruction-target-face "purple")
                (set-face-foreground 'nxml-attribute-value-delimiter-face "RosyBrown")
                (set-face-foreground 'nxml-attribute-value-face "RosyBrown")))
-               
-  
+
+
   (setq nxml-child-indent 4))
 
 (defun config-javascript-mode ()
   (autoload 'javascript-mode "javascript" nil t))
-  
+
 (defun config-css-mode ()
   (with-library css-mode
     (setq cssm-mirror-mode nil)
@@ -374,6 +374,11 @@ by using nxml's indentation rules."
 (put 'downcase-region 'disabled nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Strip trailing whitespace on save
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-to-list 'load-path "C:\\factor\\misc\\fuel\\")
@@ -397,7 +402,7 @@ by using nxml's indentation rules."
 (custom-set-variables)
 (custom-set-faces
  '(font-lock-constant-face
-   ((t 
+   ((t
      (:foreground "#d33682"
                   :inverse-video nil
                   :underline nil
@@ -425,8 +430,3 @@ by using nxml's indentation rules."
             "/articles/things-id-like-to-know.txt"]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
-
-             
-
-
-
