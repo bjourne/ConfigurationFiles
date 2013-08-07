@@ -381,7 +381,8 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'load-path "C:\\factor\\misc\\fuel\\")
+;;(add-to-list 'load-path "C:\\factor\\misc\\fuel\\")
+(add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
 (setq fuel-factor-root-dir "C:\\factor")
 (require 'factor-mode)
 (add-to-list 'auto-mode-alist '("\\.factor\\'" . factor-mode))
@@ -390,7 +391,16 @@ by using nxml's indentation rules."
 ;; Haskell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
-     '(haskell-mode-hook '(turn-on-haskell-indentation)))
+ '(haskell-mode-hook '(turn-on-haskell-indentation)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Spelling
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when is-windows
+  (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/")
+  (setq ispell-personal-dictionary "~/.ispell")
+  (setq ispell-program-name "aspell")
+  (require 'ispell))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
@@ -423,7 +433,10 @@ by using nxml's indentation rules."
      ((open-files
        (if is-windows
            '("C:/p"
-             ["/pubwork/ConfigurationFiles/dot-emacs"
+             ["/t/colshow.factor"
+              "/pubwork/ConfigurationFiles/dot-emacs"
+              "/pubwork/factor/misc/fuel/factor-mode.el"
+              "/pubwork/playground-factor/gmane/db/db.factor"
               "/v/articles/things-id-like-to-know.txt"])
          '("~/svn.bjourne.webfactional.com"
            ["/emacs/dot-emacs"
