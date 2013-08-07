@@ -69,6 +69,7 @@
                    '(nrepl
                      htmlize
                      clojure-mode
+                     clojurescript-mode
                      clojure-test-mode
                      color-theme-solarized
                      haskell-mode
@@ -357,8 +358,6 @@ by using nxml's indentation rules."
 ;; Improves performance on Windows
 (setq w32-get-true-file-attributes nil)
 
-;; Coffee!!!
-(require 'coffee-mode)
 
 ;; Jade, Sws and Stylus modes
 (with-library sws-mode)
@@ -381,11 +380,17 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;(add-to-list 'load-path "C:\\factor\\misc\\fuel\\")
-(add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
-(setq fuel-factor-root-dir "C:\\factor")
+(if is-windows
+    ((add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
+     (setq fuel-factor-root-dir "C:\\factor"))
+  (load-file "/opt/factor/misc/fuel/fu.el"))
 (require 'factor-mode)
-(add-to-list 'auto-mode-alist '("\\.factor\\'" . factor-mode))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CoffeeScript
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(with-library coffee-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Haskell
@@ -405,6 +410,11 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Theme, possibly a different init should be used on windows.
+(require 'color-theme)
+(require 'color-theme-solarized)
+(color-theme-solarized-dark)
+
 (global-font-lock-mode t)
 (set-default-font "Terminus-12")
 (load-theme 'solarized-dark t)
@@ -439,7 +449,6 @@ by using nxml's indentation rules."
               "/pubwork/playground-factor/gmane/db/db.factor"
               "/v/articles/things-id-like-to-know.txt"])
          '("~/svn.bjourne.webfactional.com"
-           ["/emacs/dot-emacs"
-            "/articles/things-id-like-to-know.txt"]))))
+           ["/articles/things-id-like-to-know.txt"]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
