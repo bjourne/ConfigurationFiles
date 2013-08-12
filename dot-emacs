@@ -381,8 +381,9 @@ by using nxml's indentation rules."
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
-    ((add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
-     (setq fuel-factor-root-dir "C:\\factor"))
+    (progn
+      (add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
+      (setq fuel-factor-root-dir "C:\\factor"))
   (load-file "/opt/factor/misc/fuel/fu.el"))
 (require 'factor-mode)
 
@@ -421,13 +422,25 @@ by using nxml's indentation rules."
 
 (custom-set-variables)
 (custom-set-faces
+ ;; Builtin faces
  '(font-lock-constant-face
    ((t
      (:foreground "#d33682"
                   :inverse-video nil
                   :underline nil
                   :slant normal
-                  :weight normal)))))
+                  :weight normal))))
+ '(font-lock-variable-name-face
+   ((t (:foreground "#6c71c4"
+                    :inverse-video nil
+                    :underline nil
+                    :slant normal
+                    :weight normal))))
+ ;; Modes I like
+ '(factor-font-lock-number
+   ((t (:inherit font-lock-constant-face
+                 :foreground "#cb4b16")))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Frame configuration
