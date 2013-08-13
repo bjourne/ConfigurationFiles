@@ -17,6 +17,7 @@
 (when is-windows
   (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin"))))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -163,7 +164,10 @@
   (global-set-key "\C-z" 'undo)
   (global-set-key "\C-?" 'backward-delete-char-untabify)
   (global-set-key [delete] 'delete-horizontal-space-forward)
-  (global-set-key (kbd "C-c m") 'rename-file-and-buffer))
+  (global-set-key (kbd "C-c m") 'rename-file-and-buffer)
+
+  ;; Ibuffer
+  (global-set-key (kbd "C-x C-b") 'ibuffer))
 
 (defun config-emacs-frame ()
   (setq frame-title-format "%b")
@@ -240,7 +244,7 @@
 
 (config-javascript-mode)
 (config-powershell-mode)
-(config-nxml-mode)
+;;(config-nxml-mode)
 
 
 ;; Setup c-indentation
@@ -380,12 +384,14 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.factor\\'" . factor-mode))
 (if is-windows
     ((add-to-list 'load-path "C:\\factor\\misc\\fuel\\")
      (setq fuel-factor-root-dir "C:\\factor"))
-  (load-file "/opt/factor/misc/fuel/fu.el"))
+
+  (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
+         (setq fuel-factor-root-dir "/opt/factor")))
 (require 'factor-mode)
+(require 'fuel-mode)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -409,7 +415,7 @@ by using nxml's indentation rules."
 
 (global-font-lock-mode t)
 (set-default-font "Terminus-12")
-(load-theme 'solarized-dark t)
+;; (load-theme 'solarized-dark t)
 
 (custom-set-variables)
 (custom-set-faces
@@ -437,7 +443,12 @@ by using nxml's indentation rules."
            '("C:/p"
              ["/pubwork/ConfigurationFiles/dot-emacs"
               "/v/articles/things-id-like-to-know.txt"])
-         '("~/svn.bjourne.webfactional.com"
-           ["/articles/things-id-like-to-know.txt"]))))
+         '("~/"
+           [
+            "svn.bjourne.webfactional.com/articles/things-id-like-to-know.txt"
+            "pubwork/factor/misc/fuel/factor-mode.el"
+            "pubwork/playground-factor/fuelcolors.factor"
+            "pubwork/ConfigurationFiles/dot-emacs"
+            ]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
