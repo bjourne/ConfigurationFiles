@@ -12,10 +12,12 @@
 (setq dired-listing-switches "-al --group-directories-first")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Stuff to put in path
+;; Stuff to put in path and other Windows customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
-  (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin"))))
+  (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin")))
+  ;; magit needs to know HOME.
+  (setenv "HOME" (concat (getenv "HOMEDRIVE") (getenv "HOMEPATH"))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -65,6 +67,7 @@
                  "http://melpa.milkbox.net/packages/"))
   (package-initialize))
 
+(package-refresh-contents)
 (mapcar 'package-install
         (remove-if 'package-installed-p
                    '(magit
@@ -75,6 +78,7 @@
                      clojure-test-mode
                      color-theme-solarized
                      haskell-mode
+                     magit
                      markdown-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -391,6 +395,8 @@ by using nxml's indentation rules."
       (setq fuel-factor-root-dir "C:\\factor"))
   (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
          (setq fuel-factor-root-dir "/opt/factor")))
+
+(setq fuel-help-always-ask nil)
 
 (require 'factor-mode)
 (require 'fuel-mode)
