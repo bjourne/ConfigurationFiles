@@ -67,7 +67,8 @@
 
 (mapcar 'package-install
         (remove-if 'package-installed-p
-                   '(nrepl
+                   '(magit
+                     nrepl
                      htmlize
                      clojure-mode
                      clojurescript-mode
@@ -391,12 +392,8 @@ by using nxml's indentation rules."
   (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
          (setq fuel-factor-root-dir "/opt/factor")))
 
-
-;;   (load-file "/opt/factor/misc/fuel/fu.el"))
-;; >>>>>>> e41e921856fa1ea2ec5f225220d7262c34ff2db5
 (require 'factor-mode)
 (require 'fuel-mode)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CoffeeScript
