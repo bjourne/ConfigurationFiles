@@ -66,7 +66,7 @@
                  "http://melpa.milkbox.net/packages/"))
   (package-initialize))
 
- (package-refresh-contents)
+;;(package-refresh-contents)
 (mapcar 'package-install
         (remove-if 'package-installed-p
                    '(nrepl
@@ -162,6 +162,9 @@
 
   ;; comment-dwim on C-c c
   (global-set-key (kbd "C-c c") 'comment-dwim)
+
+  ;; ibuffer
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
 
   ;; Basic stuff
   (global-set-key "\C-z" 'undo)
