@@ -67,7 +67,7 @@
                  "http://melpa.milkbox.net/packages/"))
   (package-initialize))
 
-(package-refresh-contents)
+;;(package-refresh-contents)
 (mapcar 'package-install
         (remove-if 'package-installed-p
                    '(magit
@@ -169,6 +169,9 @@
   ;; bound to anything by default.
   (global-set-key (kbd "s-n") 'next-buffer)
   (global-set-key (kbd "s-p") 'previous-buffer)
+
+  ;; ibuffer
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
 
   ;; Basic stuff
   (global-set-key "\C-z" 'undo)
