@@ -165,6 +165,11 @@
   ;; comment-dwim on C-c c
   (global-set-key (kbd "C-c c") 'comment-dwim)
 
+  ;; Move fast between buffers. These pretty useful commands aren't
+  ;; bound to anything by default.
+  (global-set-key (kbd "s-n") 'next-buffer)
+  (global-set-key (kbd "s-p") 'previous-buffer)
+
   ;; Basic stuff
   (global-set-key "\C-z" 'undo)
   (global-set-key "\C-?" 'backward-delete-char-untabify)
