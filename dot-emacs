@@ -91,7 +91,7 @@
   (add-to-list 'auto-mode-alist '("70-install-asterisk" . cfengine-mode))
 
   (add-to-list 'auto-mode-alist '("SConstruct" . python-mode))
-  (add-to-list 'auto-mode-alist '("SConscript" . python-mode))
+  (add-to-list 'auto-mode-alist '("SConscript\\|wscript\\|wscript_build" . python-mode))
   (add-to-list 'auto-mode-alist '(".jhbuildrc" . python-mode))
 
   (add-to-list 'auto-mode-alist '("access\\.conf\\'" . apache-mode))
@@ -402,7 +402,7 @@ by using nxml's indentation rules."
       (add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
       (setq fuel-factor-root-dir "C:\\factor"))
   (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
-         (setq fuel-factor-root-dir "/opt/factor")))
+         (setq fuel-factor-root-dir "/home/bjourne/pubwork/factor")))
 
 (setq fuel-help-always-ask nil)
 
@@ -486,7 +486,6 @@ by using nxml's indentation rules."
            [
             "svn.bjourne.webfactional.com/articles/things-id-like-to-know.txt"
             "pubwork/factor/misc/fuel/factor-mode.el"
-            "pubwork/playground-factor/fuelcolors.factor"
             "pubwork/ConfigurationFiles/dot-emacs"
             ]))))
    (mapcar (lambda (x) (concat (car open-files) x))
