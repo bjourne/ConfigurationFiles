@@ -2,6 +2,8 @@
 
 (setq is-windows (string-equal system-type "windows-nt"))
 
+(server-start)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -400,8 +402,9 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn
-      (add-to-list 'load-path "C:\\Program Files (x86)\\Factor 0.97-git\\misc\\fuel")
-      (setq fuel-factor-root-dir "C:\\Program Files (x86)\\Factor 0.97-git"))
+      (add-to-list 'load-path "c:/p/pubwork/factor/misc/fuel/")
+      (setq fuel-factor-root-dir "C:\\Program Files (x86)\\Factor 0.97-git")
+      (setq default-process-coding-system '(utf-8-unix . utf-8-unix)))
   (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
          (setq fuel-factor-root-dir "/home/bjourne/pubwork/factor")))
 
@@ -420,6 +423,11 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
  '(haskell-mode-hook '(turn-on-haskell-indentation)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; magit - highlight matches
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-set-key (kbd "C-c g") 'magit-grep)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
