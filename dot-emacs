@@ -80,6 +80,7 @@
                      clojurescript-mode
                      clojure-test-mode
                      color-theme-solarized
+                     csv-mode
                      haskell-mode
                      magit
                      markdown-mode)))
