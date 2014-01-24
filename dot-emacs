@@ -22,7 +22,6 @@
   (setenv "GIT_ASKPASS" "git-gui--askpass")
   (setenv "HOME" (concat (getenv "HOMEDRIVE") (getenv "HOMEPATH"))))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -235,8 +234,6 @@
           (setq i (+ i 4)))
         (reverse list)))
 
-
-
 ;; Make text selections visible
 (transient-mark-mode t)
 
@@ -403,9 +400,11 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn
-      (add-to-list 'load-path "c:/p/pubwork/factor/misc/fuel/")
+      (add-to-list 'load-path "C:\\Program Files (x86)\\Factor 0.97-git\\misc\\fuel")
       (setq fuel-factor-root-dir "C:\\Program Files (x86)\\Factor 0.97-git")
-      (setq default-process-coding-system '(utf-8-unix . utf-8-unix)))
+      ;; Sometimes this works, sometimes not...
+      ;;(setq default-process-coding-system '(utf-8 . utf-8))
+      )
   (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
          (setq fuel-factor-root-dir "/home/bjourne/pubwork/factor")))
 
@@ -447,9 +446,10 @@ by using nxml's indentation rules."
 (require 'color-theme-solarized)
 (color-theme-solarized-dark)
 
+
+
 (global-font-lock-mode t)
 (set-default-font "Terminus-12")
-;; (load-theme 'solarized-dark t)
 
 (custom-set-variables)
 (custom-set-faces
@@ -494,8 +494,6 @@ by using nxml's indentation rules."
            '("C:/p"
              ["/t/colshow.factor"
               "/pubwork/ConfigurationFiles/dot-emacs"
-              "/pubwork/playground-factor/gmane/db/db.factor"
-              "/pubwork/factor/basis/openssl/libssl/libssl.factor"
               "/v/articles/things-id-like-to-know.txt"])
          '("~/"
            [
