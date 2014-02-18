@@ -2,8 +2,6 @@
 
 (setq is-windows (string-equal system-type "windows-nt"))
 
-(server-start)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -402,8 +400,10 @@ by using nxml's indentation rules."
     (progn
       (add-to-list 'load-path "C:\\Program Files (x86)\\Factor 0.97-git\\misc\\fuel")
       (setq fuel-factor-root-dir "C:\\Program Files (x86)\\Factor 0.97-git")
-      ;; Sometimes this works, sometimes not...
-      ;;(setq default-process-coding-system '(utf-8 . utf-8))
+
+      ;; Order is important!
+      (prefer-coding-system 'utf-8)
+      (setq default-file-name-coding-system 'latin-1)
       )
   (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
          (setq fuel-factor-root-dir "/home/bjourne/pubwork/factor")))
@@ -503,3 +503,6 @@ by using nxml's indentation rules."
             ]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
+
+
+(server-start)
