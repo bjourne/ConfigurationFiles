@@ -5,6 +5,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'dired-x)
 (add-hook 'dired-load-hook
           (function (lambda () (load "dired-x"))))
 
@@ -401,10 +402,13 @@ by using nxml's indentation rules."
     (progn
       (add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
       (setq fuel-factor-root-dir "C:\\factor"))
-  (progn (add-to-list 'load-path "/home/bjourne/pubwork/factor/misc/fuel")
-         (setq fuel-factor-root-dir "/home/bjourne/pubwork/factor")))
+  (progn (add-to-list 'load-path "/opt/factor2/share/factor/fuel")
+         (setq fuel-factor-root-dir "/opt/factor2/bin")))
 
 (setq fuel-help-always-ask nil)
+;; Larger history
+(setq fuel-listener-history-size 10000)
+(setq comint-input-ignoredups t)
 
 (require 'factor-mode)
 (require 'fuel-mode)
@@ -487,6 +491,7 @@ by using nxml's indentation rules."
             "svn.bjourne.webfactional.com/articles/things-id-like-to-know.txt"
             "pubwork/factor/misc/fuel/factor-mode.el"
             "pubwork/ConfigurationFiles/dot-emacs"
+            "pubwork/factor/extra/pcre/pcre.factor"
             ]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
