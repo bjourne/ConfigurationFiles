@@ -2,6 +2,8 @@
 
 (setq is-windows (string-equal system-type "windows-nt"))
 
+(server-start)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -18,8 +20,8 @@
 (when is-windows
   (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin")))
   ;; magit needs to know HOME.
+  (setenv "GIT_ASKPASS" "git-gui--askpass")
   (setenv "HOME" (concat (getenv "HOMEDRIVE") (getenv "HOMEPATH"))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
@@ -68,7 +70,6 @@
                  "http://melpa.milkbox.net/packages/"))
   (package-initialize))
 
-;;(package-refresh-contents)
 (mapcar 'package-install
         (remove-if 'package-installed-p
                    '(magit
@@ -78,6 +79,7 @@
                      clojurescript-mode
                      clojure-test-mode
                      color-theme-solarized
+                     csv-mode
                      haskell-mode
                      magit
                      markdown-mode)))
@@ -232,8 +234,6 @@
           (setq i (+ i 4)))
         (reverse list)))
 
-
-
 ;; Make text selections visible
 (transient-mark-mode t)
 
@@ -263,7 +263,7 @@
 
 ;; Setup c-indentation
 (require 'cc-mode)
-(setq tab-width 4)
+(setq tab-width 2)
 (setq-default indent-tabs-mode nil)
 (setq c-basic-offset 4)
 (c-set-offset 'substatement-open 0)
@@ -400,8 +400,9 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn
-      (add-to-list 'load-path "C:\\p\\pubwork\\factor\\misc\\fuel\\")
-      (setq fuel-factor-root-dir "C:\\factor"))
+      (add-to-list 'load-path "C:\\Program Files (x86)\\Factor 0.97-git\\misc\\fuel")
+      (setq fuel-factor-root-dir "C:\\Program Files (x86)\\Factor 0.97-git")
+      )
   (progn (add-to-list 'load-path "/opt/factor2/share/factor/fuel")
          (setq fuel-factor-root-dir "/opt/factor2/bin")))
 
@@ -425,6 +426,11 @@ by using nxml's indentation rules."
  '(haskell-mode-hook '(turn-on-haskell-indentation)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; magit - highlight matches
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(global-set-key (kbd "C-c g") 'magit-grep)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
@@ -441,9 +447,10 @@ by using nxml's indentation rules."
 (require 'color-theme-solarized)
 (color-theme-solarized-dark)
 
+
+
 (global-font-lock-mode t)
 (set-default-font "Terminus-12")
-;; (load-theme 'solarized-dark t)
 
 (custom-set-variables)
 (custom-set-faces
@@ -466,6 +473,11 @@ by using nxml's indentation rules."
    ((t (:inherit font-lock-constant-face
                  :foreground "#cb4b16")))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; No startup message
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq inhibit-startup-message t)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Frame configuration
@@ -483,8 +495,6 @@ by using nxml's indentation rules."
            '("C:/p"
              ["/t/colshow.factor"
               "/pubwork/ConfigurationFiles/dot-emacs"
-              "/pubwork/factor/misc/fuel/factor-mode.el"
-              "/pubwork/playground-factor/gmane/db/db.factor"
               "/v/articles/things-id-like-to-know.txt"])
          '("~/"
            [
