@@ -428,7 +428,11 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; magit - highlight matches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-set-key (kbd "C-c g") 'magit-grep)
+(defun my-vc-git-grep ()
+  (interactive)
+  (vc-git-grep (grep-read-regexp) "*" "")
+  (other-window 1))
+(global-set-key (kbd "C-c g") 'my-vc-git-grep)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
@@ -468,6 +472,8 @@ by using nxml's indentation rules."
                     :underline nil
                     :slant normal
                     :weight normal))))
+ ;; Greps default colors are crap.
+ '(match ((t (:foreground "dark turquoise"))))
  ;; Modes I like
  '(factor-font-lock-number
    ((t (:inherit font-lock-constant-face
