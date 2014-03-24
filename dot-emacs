@@ -161,7 +161,9 @@
   (global-set-key (kbd "M-<return>") 'complete-tag)
 
   ;; Dabbrev stuff
-  (global-set-key "\C-h" 'hippie-expand)
+  ;; Used to use C-h but that keybinding is useful for showing the
+  ;; help.
+  (global-set-key "\M- " 'hippie-expand)
 
   ;; comment-dwim on C-c c
   (global-set-key (kbd "C-c c") 'comment-dwim)
@@ -416,6 +418,19 @@ by using nxml's indentation rules."
 (require 'factor-mode)
 (require 'fuel-mode)
 
+;; Better way to run files
+(defun bl-fuel-run-file (&optional arg)
+  (interactive "P")
+  (let* ((f/b (fuel-mode--read-file arg))
+         (file (car f/b))
+         (cmd (format "\"%s\" run-file\n" file)))
+    (comint-send-string (fuel-listener--process) cmd)
+    (display-buffer (fuel-listener--buffer))))
+
+(mapcar
+ (lambda (k) (define-key fuel-mode-map k 'bl-fuel-run-file))
+ '("\C-c\C-k" "\C-c\C-l" "\C-c\C-e\C-k"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CoffeeScript
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -437,6 +452,22 @@ by using nxml's indentation rules."
 (global-set-key (kbd "C-c g") 'my-vc-git-grep)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Persistent scratch
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun save-persistent-scratch ()
+  (with-current-buffer (get-buffer "*scratch*")
+    (write-region (point-min) (point-max) "~/.emacs.d/scratch")))
+
+(defun load-persistent-scratch ()
+  (if (file-exists-p "~/.emacs.d/scratch")
+      (with-current-buffer (get-buffer "*scratch*")
+        (delete-region (point-min) (point-max))
+        (insert-file "~/.emacs.d/scratch"))))
+
+(load-persistent-scratch)
+(push #'save-persistent-scratch kill-emacs-hook)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
@@ -452,8 +483,6 @@ by using nxml's indentation rules."
 (require 'color-theme)
 (require 'color-theme-solarized)
 (color-theme-solarized-dark)
-
-
 
 (global-font-lock-mode t)
 (set-default-font "Terminus-12")
