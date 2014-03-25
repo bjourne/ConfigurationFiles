@@ -428,11 +428,12 @@ by using nxml's indentation rules."
  '(haskell-mode-hook '(turn-on-haskell-indentation)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; magit - highlight matches
+;; grep - highlight matches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Had to hack vc-git.el to add --color=always to the git grep command.
 (defun my-vc-git-grep ()
   (interactive)
-  (vc-git-grep (grep-read-regexp) "*" "")
+  (vc-git-grep (grep-read-regexp) "*" (vc-git-root default-directory))
   (other-window 1))
 (global-set-key (kbd "C-c g") 'my-vc-git-grep)
 
