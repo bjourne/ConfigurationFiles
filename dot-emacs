@@ -79,6 +79,7 @@
                      color-theme-solarized
                      csv-mode
                      haskell-mode
+                     icicles
                      magit
                      markdown-mode)))
 
@@ -431,6 +432,8 @@ by using nxml's indentation rules."
 ;; grep - highlight matches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Had to hack vc-git.el to add --color=always to the git grep command.
+(require 'grep)
+(require 'vc)
 (defun my-vc-git-grep ()
   (interactive)
   (vc-git-grep (grep-read-regexp) "*" (vc-git-root default-directory))
@@ -451,13 +454,22 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, possibly a different init should be used on windows.
 (require 'color-theme)
+
 (require 'color-theme-solarized)
 (color-theme-solarized-dark)
 
 
 
 (global-font-lock-mode t)
-(set-default-font "Terminus-12")
+;; pretty reasonable Terminus look-a-like
+(set-default-font "peep") ;; 61 lines/screen
+;; (set-default-font "Terminus-12") 61 lines/screen
+;; (set-default-font "Consolas-10") ;; 65 lines/screen
+;; (set-default-font "Consolas-11") 54 lines/screen
+;; (set-default-font "Consolas-12") 51 lines/screen
+;; (set-default-font "Monaco-10") 48 lines/screen
+;; (set-default-font "Monaco-9") 51 lines/screen
+;; (set-default-font "Monaco-8") 61 lines/screen
 
 (custom-set-variables)
 (custom-set-faces
