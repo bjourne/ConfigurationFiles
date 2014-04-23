@@ -35,6 +35,21 @@
       org-export-htmlize-output-type 'css)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Improved fill-paragraph
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun toggle-fill-paragraph ()
+  (interactive)
+  (let ((pre (thing-at-point 'line))
+        (old-fill fill-column))
+    (fill-paragraph)
+    (when (string= (thing-at-point 'line) pre)
+      (setq-local fill-column 99999)
+      (fill-paragraph)
+      (setq-local fill-column old-fill))))
+(global-set-key "\M-q" 'toggle-fill-paragraph)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
