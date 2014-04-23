@@ -162,7 +162,7 @@
   (global-set-key (kbd "M-<return>") 'complete-tag)
 
   ;; Dabbrev stuff
-  (global-set-key "\C-h" 'hippie-expand)
+  (global-set-key (kbd "M-SPC") 'hippie-expand)
 
   ;; comment-dwim on C-c c
   (global-set-key (kbd "C-c c") 'comment-dwim)
@@ -456,7 +456,7 @@ by using nxml's indentation rules."
 (require 'color-theme)
 
 (require 'color-theme-solarized)
-(color-theme-solarized-dark)
+;; (color-theme-solarized-dark)
 
 
 
@@ -465,7 +465,7 @@ by using nxml's indentation rules."
 (set-default-font "peep") ;; 61 lines/screen
 ;; (set-default-font "Terminus-12") 61 lines/screen
 ;; (set-default-font "Consolas-10") ;; 65 lines/screen
-;; (set-default-font "Consolas-11") 54 lines/screen
+;; (set-default-font "Consolas-12") ;; 54 lines/screen
 ;; (set-default-font "Consolas-12") 51 lines/screen
 ;; (set-default-font "Monaco-10") 48 lines/screen
 ;; (set-default-font "Monaco-9") 51 lines/screen
