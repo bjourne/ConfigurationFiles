@@ -1,0 +1,12 @@
+#!/bin/bash
+# Deletes the branch, locally and remotely.
+set -e
+
+branch=$1
+if [[ -z "$branch" ]]; then
+    echo "Error, specify branch name."
+    exit 1
+fi
+
+git branch -D $branch
+git push origin --delete $branch

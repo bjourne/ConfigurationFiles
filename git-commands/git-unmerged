@@ -1,0 +1,29 @@
+#!/bin/bash
+# Outputs a list of all commits on a given branch not merged to
+# master. Like git cherry, except with a sane equivalence key.
+set -e
+
+branch=$1
+if [[ -z "$branch" ]]; then
+    branch=`git rev-parse --abbrev-ref HEAD`
+fi
+
+# Commits counts as unmerged if they don't appear in this branch.
+MERGE_TARGET=master
+
+# Opts to git log
+opts=(log --pretty=format:"%ad %ae %s" --date=iso)
+
+# Make the cache
+repo=`basename $(git rev-parse --show-toplevel)`
+sha1=`git rev-parse $MERGE_TARGET`
+cache_file="/tmp/log-$repo-$sha1.txt"
+if [[ ! -f "$cache_file" ]]; then
+    git "${opts[@]}" $MERGE_TARGET | sort > $cache_file
+fi
+
+# What are the unique commits?
+comm -23 <(git "${opts[@]}" ..$branch | sort) $cache_file
+
+
+#diff <( git "${opts[@]}" master ) <( git "${opts[@]}" ..$branch ) | grep "^>" --color=none

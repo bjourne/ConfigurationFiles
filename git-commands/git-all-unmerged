@@ -1,0 +1,16 @@
+#!/bin/bash
+# Counts the number of commits not merged to the master branch for
+# each given branch.
+set -e
+
+branches=()
+eval "$(git for-each-ref --shell --format='branches+=(%(refname))' refs/heads/)"
+for branch in "${branches[@]}"; do
+    branch=`basename $branch`
+    if [[ $branch = "master" ]]; then
+        continue
+    fi
+    count=`~/bin/git-unmerged $branch | wc -l`
+
+    printf "%-30s%3d unmerged\n" $branch $count
+done
