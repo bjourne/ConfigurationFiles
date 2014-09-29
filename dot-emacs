@@ -35,6 +35,55 @@
       org-export-htmlize-output-type 'css)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; geiser
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq geiser-racket-binary "C:/Program Files (x86)/Racket/Racket.exe")
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Improved fill-paragraph
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun toggle-fill-paragraph ()
+  (interactive)
+  (let ((pre (thing-at-point 'line))
+        (old-fill fill-column))
+    (fill-paragraph)
+    (when (string= (thing-at-point 'line) pre)
+      (setq-local fill-column 99999)
+      (fill-paragraph)
+      (setq-local fill-column old-fill))))
+(global-set-key "\M-q" 'toggle-fill-paragraph)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Improved move to beginning of line
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun smarter-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+
+Move point to the first non-whitespace character on this line.
+If point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line.
+
+If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+
+(global-set-key [remap move-beginning-of-line]
+                'smarter-move-beginning-of-line)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
@@ -67,6 +116,8 @@
                '("melpa" .
                  "http://melpa.milkbox.net/packages/"))
   (package-initialize))
+
+
 
 (mapcar 'package-install
         (remove-if 'package-installed-p
@@ -156,32 +207,26 @@
     (setq cssm-indent-level 4)))
 
 (defun config-global-keybindings ()
-  ;; Set some keyboard shortcuts
-  (global-set-key "\M-g" 'goto-line)
-  (global-set-key [f9] 'compile)
-  (global-set-key (kbd "M-<return>") 'complete-tag)
+        ;; Set some keyboard shortcuts
+        (global-set-key "\M-g" 'goto-line)
+        (global-set-key [f9] 'compile)
+        (global-set-key (kbd "M-<return>") 'complete-tag)
 
-  ;; Dabbrev stuff
-  ;; Used to use C-h but that keybinding is useful for showing the
-  ;; help.
-  (global-set-key "\M- " 'hippie-expand)
+        ;; Dabbrev stuff
+        (global-set-key (kbd "M-SPC") 'hippie-expand)
 
-  ;; comment-dwim on C-c c
-  (global-set-key (kbd "C-c c") 'comment-dwim)
+        ;; comment-dwim on C-c c
+        (global-set-key (kbd "C-c c") 'comment-dwim)
+        ;; Move fast between buffers. These pretty useful commands aren't
+        ;; bound to anything by default.
+        (global-set-key (kbd "s-n") 'next-buffer)
+        (global-set-key (kbd "s-p") 'previous-buffer)
 
-  ;; Move fast between buffers. These pretty useful commands aren't
-  ;; bound to anything by default.
-  (global-set-key (kbd "s-n") 'next-buffer)
-  (global-set-key (kbd "s-p") 'previous-buffer)
-
-  ;; ibuffer
-  (global-set-key (kbd "C-x C-b") 'ibuffer)
-
-  ;; Basic stuff
-  (global-set-key "\C-z" 'undo)
-  (global-set-key "\C-?" 'backward-delete-char-untabify)
-  (global-set-key [delete] 'delete-horizontal-space-forward)
-  (global-set-key (kbd "C-c m") 'rename-file-and-buffer)
+        ;; Basic stuff
+        (global-set-key "\C-z" 'undo)
+        (global-set-key "\C-?" 'backward-delete-char-untabify)
+        (global-set-key [delete] 'delete-horizontal-space-forward)
+        (global-set-key (kbd "C-c m") 'rename-file-and-buffer)
 
   ;; Ibuffer
   (global-set-key (kbd "C-x C-b") 'ibuffer))
@@ -271,12 +316,12 @@
 
 ;; Make the autosaves go away
 (setq backup-by-copying t      ; don't clobber symlinks
-      backup-directory-alist
-      '(("." . "~/.saves"))    ; don't litter my fs tree
-      delete-old-versions t
-      kept-new-versions 6
-      kept-old-versions 2
-      version-control t)       ; use versioned backups
+        backup-directory-alist
+        '(("." . "~/.saves"))    ; don't litter my fs tree
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t)       ; use versioned backups
 
 ;; This should make *.~[:d:]~ files created by vc-mode also go away
 (vc-stay-local-p nil)
@@ -392,6 +437,27 @@ by using nxml's indentation rules."
 (put 'downcase-region 'disabled nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ace-jump-mode, provisional. Not sure I like it yet
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(autoload
+  'ace-jump-mode
+  "ace-jump-mode"
+  "Emacs quick move minor mode"
+  t)
+(define-key global-map (kbd "C-c ö") 'ace-jump-mode)
+
+(autoload
+  'ace-jump-mode-pop-mark
+  "ace-jump-mode"
+  "Ace jump back:-)"
+  t)
+(eval-after-load "ace-jump-mode"
+  '(ace-jump-mode-enable-mark-sync))
+
+(define-key global-map (kbd "C-c å") 'ace-jump-mode-pop-mark)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Strip trailing whitespace on save
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -494,7 +560,7 @@ by using nxml's indentation rules."
 (set-default-font "peep") ;; 61 lines/screen
 ;; (set-default-font "Terminus-12") 61 lines/screen
 ;; (set-default-font "Consolas-10") ;; 65 lines/screen
-;; (set-default-font "Consolas-11") 54 lines/screen
+;; (set-default-font "Consolas-12") ;; 54 lines/screen
 ;; (set-default-font "Consolas-12") 51 lines/screen
 ;; (set-default-font "Monaco-10") 48 lines/screen
 ;; (set-default-font "Monaco-9") 51 lines/screen
