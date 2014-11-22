@@ -33,6 +33,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq org-src-fontify-natively t
       org-export-htmlize-output-type 'css)
+(setq org-log-done t)
+(setq org-time-stamp-custom-formats '("<%d/%m/%Y %a>" . "<%Y-%m-%d %H:%M>"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; geiser
@@ -485,19 +487,6 @@ by using nxml's indentation rules."
 (require 'factor-mode)
 (require 'fuel-mode)
 
-;; Better way to run files
-(defun bl-fuel-run-file (&optional arg)
-  (interactive "P")
-  (let* ((f/b (fuel-mode--read-file arg))
-         (file (car f/b))
-         (cmd (format "\"%s\" run-file\n" file)))
-    (comint-send-string (fuel-listener--process) cmd)
-    (display-buffer (fuel-listener--buffer))))
-
-(mapcar
- (lambda (k) (define-key fuel-mode-map k 'bl-fuel-run-file))
- '("\C-c\C-k" "\C-c\C-l" "\C-c\C-e\C-k"))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CoffeeScript
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -557,8 +546,8 @@ by using nxml's indentation rules."
 
 (global-font-lock-mode t)
 ;; pretty reasonable Terminus look-a-like
-(set-default-font "peep") ;; 61 lines/screen
-;; (set-default-font "Terminus-12") 61 lines/screen
+;;(set-default-font "peep") ;; 61 lines/screen
+(set-default-font "Terminus-12") ;; 61 lines/screen
 ;; (set-default-font "Consolas-10") ;; 65 lines/screen
 ;; (set-default-font "Consolas-12") ;; 54 lines/screen
 ;; (set-default-font "Consolas-12") 51 lines/screen
@@ -576,6 +565,15 @@ by using nxml's indentation rules."
                   :underline nil
                   :slant normal
                   :weight normal))))
+
+ '(factor-font-lock-vocabulary-name
+   ((t
+     (:foreground "#c03672"
+                  :inverse-video nil
+                  :underline nil
+                  :slant normal
+                  :weight normal))))
+
  '(font-lock-variable-name-face
    ((t (:foreground "#6c71c4"
                     :inverse-video nil
@@ -614,7 +612,7 @@ by using nxml's indentation rules."
               "/v/articles/things-id-like-to-know.txt"])
          '("~/"
            [
-            "svn.bjourne.webfactional.com/articles/things-id-like-to-know.txt"
+            "privwork/personal/articles/qs/things-id-like-to-know.txt"
             "pubwork/factor/misc/fuel/factor-mode.el"
             "pubwork/ConfigurationFiles/dot-emacs"
             "pubwork/factor/extra/pcre/pcre.factor"
