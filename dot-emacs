@@ -177,7 +177,6 @@ point reaches the beginning or end of the buffer, stop there."
   )
 
 (defun config-nxml-mode ()
-  (add-to-list 'load-path "c:/.emacs.d/my-packages/nxml-mode-20041004")
   (add-to-list 'auto-mode-alist
                (cons (concat "\\." (regexp-opt '("xml" "xsd") t) "\\'")
                      'nxml-mode))
@@ -194,10 +193,7 @@ point reaches the beginning or end of the buffer, stop there."
                (set-face-foreground 'nxml-processing-instruction-delimiter-face "purple")
                (set-face-foreground 'nxml-processing-instruction-target-face "purple")
                (set-face-foreground 'nxml-attribute-value-delimiter-face "RosyBrown")
-               (set-face-foreground 'nxml-attribute-value-face "RosyBrown")))
-
-
-  (setq nxml-child-indent 4))
+               (set-face-foreground 'nxml-attribute-value-face "RosyBrown"))))
 
 (defun config-javascript-mode ()
   (autoload 'javascript-mode "javascript" nil t))
@@ -209,26 +205,26 @@ point reaches the beginning or end of the buffer, stop there."
     (setq cssm-indent-level 4)))
 
 (defun config-global-keybindings ()
-        ;; Set some keyboard shortcuts
-        (global-set-key "\M-g" 'goto-line)
-        (global-set-key [f9] 'compile)
-        (global-set-key (kbd "M-<return>") 'complete-tag)
+  ;; Set some keyboard shortcuts
+  (global-set-key "\M-g" 'goto-line)
+  (global-set-key [f9] 'compile)
+  (global-set-key (kbd "M-<return>") 'complete-tag)
 
-        ;; Dabbrev stuff
-        (global-set-key (kbd "M-SPC") 'hippie-expand)
+  ;; Dabbrev stuff
+  (global-set-key (kbd "M-SPC") 'hippie-expand)
 
-        ;; comment-dwim on C-c c
-        (global-set-key (kbd "C-c c") 'comment-dwim)
-        ;; Move fast between buffers. These pretty useful commands aren't
-        ;; bound to anything by default.
-        (global-set-key (kbd "s-n") 'next-buffer)
-        (global-set-key (kbd "s-p") 'previous-buffer)
+  ;; comment-dwim on C-c c
+  (global-set-key (kbd "C-c c") 'comment-dwim)
+  ;; Move fast between buffers. These pretty useful commands aren't
+  ;; bound to anything by default.
+  (global-set-key (kbd "s-n") 'next-buffer)
+  (global-set-key (kbd "s-p") 'previous-buffer)
 
-        ;; Basic stuff
-        (global-set-key "\C-z" 'undo)
-        (global-set-key "\C-?" 'backward-delete-char-untabify)
-        (global-set-key [delete] 'delete-horizontal-space-forward)
-        (global-set-key (kbd "C-c m") 'rename-file-and-buffer)
+  ;; Basic stuff
+  (global-set-key "\C-z" 'undo)
+  (global-set-key "\C-?" 'backward-delete-char-untabify)
+  (global-set-key [delete] 'delete-horizontal-space-forward)
+  (global-set-key (kbd "C-c m") 'rename-file-and-buffer)
 
   ;; Ibuffer
   (global-set-key (kbd "C-x C-b") 'ibuffer))
@@ -306,8 +302,6 @@ point reaches the beginning or end of the buffer, stop there."
 
 (config-javascript-mode)
 (config-powershell-mode)
-;;(config-nxml-mode)
-
 
 ;; Setup c-indentation
 (require 'cc-mode)
@@ -325,13 +319,16 @@ point reaches the beginning or end of the buffer, stop there."
         kept-old-versions 2
         version-control t)       ; use versioned backups
 
-;; This should make *.~[:d:]~ files created by vc-mode also go away
-(vc-stay-local-p nil)
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Better editing
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq kill-whole-line t)
 
 (setq backward-delete-char-untabify-method 'all)
+
+(defun copy-buffer-file-path()
+  (interactive "*")
+  (kill-new buffer-file-name))
 
 (defun delete-horizontal-space-forward()
   (interactive "*")
@@ -380,7 +377,7 @@ point reaches the beginning or end of the buffer, stop there."
 
 ;; Setup personal info. This is to make ChangeLog mode work
 (setq user-mail-address "bjourne@gmail.com")
-(setq user-full-name "Björn Lindqvist")
+(setq user-full-name "BjÃ¶rn Lindqvist")
 
 ;; Better uniquify
 (require 'uniquify)
@@ -446,7 +443,7 @@ by using nxml's indentation rules."
   "ace-jump-mode"
   "Emacs quick move minor mode"
   t)
-(define-key global-map (kbd "C-c ö") 'ace-jump-mode)
+(define-key global-map (kbd "C-c Ã¶") 'ace-jump-mode)
 
 (autoload
   'ace-jump-mode-pop-mark
@@ -456,7 +453,7 @@ by using nxml's indentation rules."
 (eval-after-load "ace-jump-mode"
   '(ace-jump-mode-enable-mark-sync))
 
-(define-key global-map (kbd "C-c å") 'ace-jump-mode-pop-mark)
+(define-key global-map (kbd "C-c Ã¥") 'ace-jump-mode-pop-mark)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -465,19 +462,34 @@ by using nxml's indentation rules."
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Magit
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq magit-last-seen-setup-instructions "1.4.0")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Java
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-hook 'java-mode-hook (lambda ()
+                            (c-set-offset 'arglist-close 0)
+                            (c-set-offset 'arglist-cont-nonempty '+)
+                            (c-set-offset 'class-close -1)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn
+
       (add-to-list 'load-path "C:\\Program Files (x86)\\Factor 0.97-git\\misc\\fuel")
       (setq fuel-factor-root-dir "C:\\Program Files (x86)\\Factor 0.97-git")
-
       ;; Order is important!
       (prefer-coding-system 'utf-8)
       (setq default-file-name-coding-system 'latin-1)
       )
-  (progn (add-to-list 'load-path "/opt/factor2/share/factor/fuel")
-         (setq fuel-factor-root-dir "/opt/factor2/bin")))
+  (progn
+    (add-to-list 'load-path "/opt/factor32/share/factor/fuel")
+    (setq fuel-factor-root-dir "/opt/factor32/bin")))
 
 (setq fuel-help-always-ask nil)
 ;; Larger history
