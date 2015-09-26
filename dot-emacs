@@ -124,11 +124,9 @@ point reaches the beginning or end of the buffer, stop there."
 (mapcar 'package-install
         (remove-if 'package-installed-p
                    '(magit
-                     nrepl
                      htmlize
                      clojure-mode
                      clojurescript-mode
-                     clojure-test-mode
                      color-theme-solarized
                      csv-mode
                      haskell-mode
