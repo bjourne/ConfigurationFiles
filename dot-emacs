@@ -550,14 +550,31 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, possibly a different init should be used on windows.
 (require 'color-theme)
-
 (require 'color-theme-solarized)
-(color-theme-solarized-dark)
 
 (global-font-lock-mode t)
+
+(defun gui-theme ()
+  (color-theme-initialize)
+  (color-theme-solarized-dark)
+  (set-face-foreground 'font-lock-variable-name-face "#6c71c4"))
+
+(defun console-theme ()
+  (custom-set-faces
+     '(font-lock-comment-face ((t (:foreground "black" :weight bold))))
+     '(font-lock-constant-face ((t (:foreground "magenta" :weight bold))))
+     '(font-lock-keyword-face ((t (:foreground "magenta"))))
+     '(font-lock-preprocessor-face ((t (:foreground "red"))))
+     '(font-lock-string-face ((t (:foreground "yellow"))))
+     '(font-lock-type-face ((t (:foreground "cyan"))))
+     '(font-lock-variable-name-face ((t (:foreground "cyan" :weight bold))))))
+
+(if (display-graphic-p) (gui-theme) (console-theme))
+
+
 ;; pretty reasonable Terminus look-a-like
 ;;(set-default-font "peep") ;; 61 lines/screen
-(set-default-font "Terminus-12") ;; 61 lines/screen
+(set-default-font "Inconsolata-14") ;; 61 lines/screen
 ;; (set-default-font "Consolas-10") ;; 65 lines/screen
 ;; (set-default-font "Consolas-12") ;; 54 lines/screen
 ;; (set-default-font "Consolas-12") 51 lines/screen
@@ -566,36 +583,28 @@ by using nxml's indentation rules."
 ;; (set-default-font "Monaco-8") 61 lines/screen
 
 (custom-set-variables)
-(custom-set-faces
- ;; Builtin faces
- '(font-lock-constant-face
-   ((t
-     (:foreground "#d33682"
-                  :inverse-video nil
-                  :underline nil
-                  :slant normal
-                  :weight normal))))
-
- '(factor-font-lock-vocabulary-name
-   ((t
-     (:foreground "#c03672"
-                  :inverse-video nil
-                  :underline nil
-                  :slant normal
-                  :weight normal))))
-
- '(font-lock-variable-name-face
-   ((t (:foreground "#6c71c4"
-                    :inverse-video nil
-                    :underline nil
-                    :slant normal
-                    :weight normal))))
- ;; Greps default colors are crap.
- '(match ((t (:foreground "dark turquoise"))))
- ;; Modes I like
- '(factor-font-lock-number
-   ((t (:inherit font-lock-constant-face
-                 :foreground "#cb4b16")))))
+;; (custom-set-faces
+;;  ;; Builtin faces
+;;  '(font-lock-constant-face
+;;    ((t
+;;      (:foreground "#d33682"
+;;                   :inverse-video nil
+;;                   :underline nil
+;;                   :slant normal
+;;                   :weight normal))))
+;;  '(factor-font-lock-vocabulary-name
+;;    ((t
+;;      (:foreground "#c03672"
+;;                   :inverse-video nil
+;;                   :underline nil
+;;                   :slant normal
+;;                   :weight normal))))
+;;  ;; Greps default colors are crap.
+;;  '(match ((t (:foreground "dark turquoise"))))
+;;  ;; Modes I like
+;;  '(factor-font-lock-number
+;;    ((t (:inherit font-lock-constant-face
+;;                  :foreground "#cb4b16")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; No startup message
