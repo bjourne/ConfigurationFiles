@@ -91,13 +91,7 @@ point reaches the beginning or end of the buffer, stop there."
 (if is-windows
     (progn (setq default-directory "C:\\")
            (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\"))
-  (progn (add-to-list 'load-path (expand-file-name "~/.site-lisp/"))
-         (setq auto-save-file-name-transforms
-               '(("\\`/[^/]*:\\(.+/\\)*\\(.*\\)"
-                  "/tmp/\\2" t)
-                 ("\\`/?\\([^/]*/\\)*\\([^/]*\\)\\'"
-                  "/tmp/\\2" t)))
-         (setq auto-save-default nil)))
+  (progn (add-to-list 'load-path (expand-file-name "~/.site-lisp/"))))
 
 (defmacro with-library (symbol &rest body)
   `(condition-case nil
@@ -308,14 +302,23 @@ point reaches the beginning or end of the buffer, stop there."
 (setq c-basic-offset 4)
 (c-set-offset 'substatement-open 0)
 
-;; Make the autosaves go away
-(setq backup-by-copying t      ; don't clobber symlinks
-        backup-directory-alist
-        '(("." . "~/.saves"))    ; don't litter my fs tree
-        delete-old-versions t
-        kept-new-versions 6
-        kept-old-versions 2
-        version-control t)       ; use versioned backups
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Auto saving backups. Stupid retarted emacs defaults.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defvar saves-dir (expand-file-name "~/.saves/"))
+
+(setq backup-by-copying t)
+(setq backup-directory-alist `((".*" . ,saves-dir)))
+(setq auto-save-default t)
+(setq auto-save-list-file-prefix (concat saves-dir "save-"))
+(setq auto-save-file-name-transforms `((".*" ,saves-dir t)))
+
+(setq delete-old-versions nil)
+(setq kept-new-versions 6)
+(setq kept-old-versions 2)
+; use versioned backups
+(setq version-control t)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Better editing
@@ -465,6 +468,18 @@ by using nxml's indentation rules."
 (setq magit-last-seen-setup-instructions "1.4.0")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Python
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my-run-python (cmd &optional dedicated show)
+  (interactive "P")
+  (run-python cmd dedicated show)
+  (switch-to-buffer-other-window "*Python*"))
+(require 'python)
+(define-key python-mode-map "\C-c\C-p" 'my-run-python)
+(setq python-shell-interpreter "python")
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Java
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'java-mode-hook (lambda ()
@@ -486,8 +501,9 @@ by using nxml's indentation rules."
       (setq default-file-name-coding-system 'latin-1)
       )
   (progn
-    (add-to-list 'load-path "/opt/factor32/share/factor/fuel")
-    (setq fuel-factor-root-dir "/opt/factor32/bin")))
+    (add-to-list 'load-path "/home/bjourne/pubwork/factor-orig/misc/fuel/")
+    (setq fuel-factor-root-dir "/home/bjourne/pubwork/factor-orig/"))
+  )
 
 (setq fuel-help-always-ask nil)
 ;; Larger history
@@ -546,6 +562,12 @@ by using nxml's indentation rules."
   (require 'ispell))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; yasnippet
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'yasnippet)
+(yas-global-mode 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, possibly a different init should be used on windows.
@@ -555,7 +577,7 @@ by using nxml's indentation rules."
 (global-font-lock-mode t)
 
 (defun gui-theme ()
-  (color-theme-initialize)
+  ;;(color-theme-initialize)
   (color-theme-solarized-dark)
   (set-face-foreground 'font-lock-variable-name-face "#6c71c4"))
 
@@ -574,7 +596,7 @@ by using nxml's indentation rules."
 
 ;; pretty reasonable Terminus look-a-like
 ;;(set-default-font "peep") ;; 61 lines/screen
-(set-default-font "Inconsolata-14") ;; 61 lines/screen
+;;(set-default-font "Inconsolata-14") ;; 61 lines/screen
 ;; (set-default-font "Consolas-10") ;; 65 lines/screen
 ;; (set-default-font "Consolas-12") ;; 54 lines/screen
 ;; (set-default-font "Consolas-12") 51 lines/screen
@@ -632,9 +654,10 @@ by using nxml's indentation rules."
          '("~/"
            [
             "privwork/personal/articles/qs/things-id-like-to-know.txt"
-            "pubwork/factor/misc/fuel/factor-mode.el"
+            "pubwork/factor-orig/misc/fuel/factor-mode.el"
+            "pubwork/factor-orig/basis/ui/gestures/gestures.factor"
+            "pubwork/factor-orig/basis/windows/gdi32/gdi32.factor"
             "pubwork/ConfigurationFiles/dot-emacs"
-            "pubwork/factor/extra/pcre/pcre.factor"
             ]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
