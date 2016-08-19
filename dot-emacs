@@ -295,12 +295,20 @@ point reaches the beginning or end of the buffer, stop there."
 (config-javascript-mode)
 (config-powershell-mode)
 
-;; Setup c-indentation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CC-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'cc-mode)
 (setq tab-width 2)
 (setq-default indent-tabs-mode nil)
 (setq c-basic-offset 4)
 (c-set-offset 'substatement-open 0)
+
+(defun my-c-initialization-hook ()
+  (define-key c-mode-base-map (kbd "C-c C-d") nil)
+  (define-key c-mode-base-map (kbd "C-c C-d C-d") 'man-follow))
+
+(add-hook 'c-initialization-hook 'my-c-initialization-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Stupid retarted emacs defaults.
