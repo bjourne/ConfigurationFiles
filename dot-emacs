@@ -3,6 +3,23 @@
 (setq is-windows (string-equal system-type "windows-nt"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Frame customization -- widget removal
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+(setq inhibit-splash-screen t)
+
+(setq frame-title-format "%b")
+(setq icon-title-format frame-title-format)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; frame splitting
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; I prefer to split side-by-side rather than on top and below.
+;; TODO: code here
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'dired-x)
@@ -11,14 +28,6 @@
 
 ;; This shouldn't work on Windows
 (setq dired-listing-switches "-al --group-directories-first")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Stuff to put in path and other Windows customization
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when is-windows
-  (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin")))
-  ;; magit needs to know HOME.
-  (setenv "GIT_ASKPASS" "git-gui--askpass"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
@@ -34,12 +43,12 @@
       org-export-htmlize-output-type 'css)
 (setq org-log-done t)
 (setq org-time-stamp-custom-formats '("<%d/%m/%Y %a>" . "<%Y-%m-%d %H:%M>"))
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; geiser
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq geiser-racket-binary "C:/Program Files (x86)/Racket/Racket.exe")
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved fill-paragraph
@@ -89,7 +98,10 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn (setq default-directory "C:\\")
-           (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\"))
+           (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\")
+           (setq exec-path
+                 (append exec-path '("C:/Program Files (x86)/Git/bin")))
+           (setenv "GIT_ASKPASS" "git-gui--askpass"))
   (progn (add-to-list 'load-path (expand-file-name "~/.site-lisp/"))))
 
 (defmacro with-library (symbol &rest body)
@@ -102,7 +114,9 @@ point reaches the beginning or end of the buffer, stop there."
       nil)))
 (put 'with-library 'lisp-indent-function 1)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package management
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (package-initialize)
 ;; Marmalade still doesn't work for me.
 ;;(add-to-list 'package-archives
@@ -112,7 +126,7 @@ point reaches the beginning or end of the buffer, stop there."
 	     '("melpa" .
 	       "http://melpa.milkbox.net/packages/"))
 (package-initialize)
-(package-refresh-contents)
+;;(package-refresh-contents)
 
 (mapcar 'package-install
         (remove-if 'package-installed-p
@@ -158,7 +172,6 @@ point reaches the beginning or end of the buffer, stop there."
 
   (add-to-list 'auto-mode-alist '("extensions\\.conf\\'" . conf-windows-mode))
   (add-to-list 'auto-mode-alist '("dot-emacs$" . emacs-lisp-mode))
-  (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
   ;; markdown
   (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
   ;; zsh
@@ -218,23 +231,12 @@ point reaches the beginning or end of the buffer, stop there."
   ;; Ibuffer
   (global-set-key (kbd "C-x C-b") 'ibuffer))
 
-(defun config-emacs-frame ()
-  (setq frame-title-format "%b")
-  (setq icon-title-format frame-title-format))
-
 (defun config-auto-insert-mode ()
   (require 'autoinsert)
   (auto-insert-mode)
   (setq auto-insert-directory "~/.site-lisp/templates/")
   (setq auto-insert-query nil)
   (define-auto-insert "\.py" "python-template.py"))
-
-(defun remove-widgets ()
-  "Remove unneeded widgets"
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
-  (tool-bar-mode -1)
-  (setq inhibit-splash-screen t))
 
 (defun config-session ()
   (with-library session
@@ -246,8 +248,6 @@ point reaches the beginning or end of the buffer, stop there."
     (add-to-list 'auto-mode-alist '("\\.psm1\\'" . powershell-mode))))
 
 (config-auto-insert-mode)
-(config-emacs-frame)
-(remove-widgets)
 
 ;; This library is new in emacs 22 I think and gives me lots of
 ;; goodies. etc-fstab-generic-mode for example!
@@ -323,7 +323,6 @@ point reaches the beginning or end of the buffer, stop there."
 (setq kept-old-versions 2)
 ; use versioned backups
 (setq version-control t)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Better editing
