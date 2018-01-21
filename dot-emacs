@@ -18,8 +18,7 @@
 (when is-windows
   (setq exec-path (append exec-path '("C:/Program Files (x86)/Git/bin")))
   ;; magit needs to know HOME.
-  (setenv "GIT_ASKPASS" "git-gui--askpass")
-  (setenv "HOME" (concat (getenv "HOMEDRIVE") (getenv "HOMEPATH"))))
+  (setenv "GIT_ASKPASS" "git-gui--askpass"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
@@ -104,28 +103,26 @@ point reaches the beginning or end of the buffer, stop there."
 (put 'with-library 'lisp-indent-function 1)
 
 ;; Package management
-(with-library package
-  (add-to-list 'package-archives
-	       '("marmalade" .
-		 "http://marmalade-repo.org/packages/"))
-  (add-to-list 'package-archives
-               '("melpa" .
-                 "http://melpa.milkbox.net/packages/"))
-  (package-initialize))
-
-
+(package-initialize)
+;; Marmalade still doesn't work for me.
+;;(add-to-list 'package-archives
+;; 	     '("marmalade" .
+;; 	       "http://marmalade-repo.org/packages/"))
+(add-to-list 'package-archives
+	     '("melpa" .
+	       "http://melpa.milkbox.net/packages/"))
+(package-initialize)
+(package-refresh-contents)
 
 (mapcar 'package-install
         (remove-if 'package-installed-p
                    '(magit
                      htmlize
                      clojure-mode
-                     clojurescript-mode
                      color-theme-solarized
                      csv-mode
                      haskell-mode
                      icicles
-                     magit
                      markdown-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -501,15 +498,11 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn
-
-      (add-to-list
-       'load-path
-       "C:\\Program Files (x86)\\Factor 0.97-git\\misc\\fuel")
-      (setq fuel-factor-root-dir "C:\\Program Files (x86)\\Factor 0.97-git")
+      (add-to-list 'load-path "C:\\code\\pubwork\\orig\\factor\\misc\\fuel")
+      (setq fuel-factor-root-dir "C:\\code\\pubwork\\orig\\factor\\")
       ;; Order is important!
       (prefer-coding-system 'utf-8)
-      (setq default-file-name-coding-system 'latin-1)
-      )
+      (setq default-file-name-coding-system 'latin-1))
   (progn
     (add-to-list 'load-path "~/pubwork/factor-orig/misc/fuel")
     (setq fuel-factor-root-dir "~/pubwork/factor-orig")))
@@ -571,12 +564,6 @@ by using nxml's indentation rules."
   (require 'ispell))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; yasnippet
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'yasnippet)
-(yas-global-mode 1)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, possibly a different init should be used on windows.
@@ -588,7 +575,8 @@ by using nxml's indentation rules."
 (defun gui-theme ()
   ;; Inconsolata with italic and bold variants:
   ;; https://github.com/MihailJP/Inconsolata-LGC
-  (set-default-font "Inconsolata LGC-12")
+  (set-default-font
+   (if is-windows "Consolas-11" "Inconsolata LGC-12"))
   (color-theme-initialize)
   (color-theme-solarized-dark)
   (set-face-foreground 'font-lock-constant-face "#d33682")
@@ -617,7 +605,8 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Frame configuration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when is-windows (w32-send-sys-command 61488))
+;; It's better to use the -mm parameter
+;;(when is-windows (w32-send-sys-command 61488))
 (setq frame-resize-pixelwise t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -628,10 +617,11 @@ by using nxml's indentation rules."
  (let
      ((open-files
        (if is-windows
-           '("C:/p"
-             ["/t/colshow.factor"
-              "/pubwork/ConfigurationFiles/dot-emacs"
-              "/v/articles/things-id-like-to-know.txt"])
+           '("C:/code"
+             ["/pubwork/ConfigurationFiles/dot-emacs"
+              "/pubwork/orig/factor/basis/windows/gdi32/gdi32.factor"
+              "/pubwork/orig/factor/misc/fuel/factor-mode.el"
+              ])
          '("~/"
            [
             "privwork/personal/articles/qs/things-id-like-to-know.txt"
