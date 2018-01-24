@@ -2,9 +2,9 @@
 
 (setq is-windows (string-equal system-type "windows-nt"))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Frame customization -- widget removal
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
@@ -13,15 +13,15 @@
 (setq frame-title-format "%b")
 (setq icon-title-format frame-title-format)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; frame splitting
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; I prefer to split side-by-side rather than on top and below.
 ;; TODO: code here
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'dired-x)
 (add-hook 'dired-load-hook
           (function (lambda () (load "dired-x"))))
@@ -29,30 +29,32 @@
 ;; This shouldn't work on Windows
 (setq dired-listing-switches "-al --group-directories-first")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (ido-mode t)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; org-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq org-src-fontify-natively t
       org-export-htmlize-output-type 'css)
 (setq org-log-done t)
-(setq org-time-stamp-custom-formats '("<%d/%m/%Y %a>" . "<%Y-%m-%d %H:%M>"))
+(setq org-time-stamp-custom-formats
+      '("<%d/%m/%Y %a>" . "<%Y-%m-%d %H:%M>"))
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; geiser
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq geiser-racket-binary "C:/Program Files (x86)/Racket/Racket.exe")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when is-windows
+  (setq geiser-racket-binary "C:/Program Files (x86)/Racket/Racket.exe"))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved fill-paragraph
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun toggle-fill-paragraph ()
   (interactive)
   (let ((pre (thing-at-point 'line))
@@ -64,9 +66,9 @@
       (setq-local fill-column old-fill))))
 (global-set-key "\M-q" 'toggle-fill-paragraph)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved move to beginning of line
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun smarter-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
 
@@ -93,9 +95,9 @@ point reaches the beginning or end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn (setq default-directory "C:\\")
            (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\")
@@ -114,9 +116,9 @@ point reaches the beginning or end of the buffer, stop there."
       nil)))
 (put 'with-library 'lisp-indent-function 1)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package management
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (package-initialize)
 ;; Marmalade still doesn't work for me.
 ;;(add-to-list 'package-archives
@@ -139,7 +141,32 @@ point reaches the beginning or end of the buffer, stop there."
                      icicles
                      markdown-mode)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; NXML
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'auto-mode-alist
+             (cons (concat "\\." (regexp-opt '("xml" "xsd") t) "\\'")
+                   'nxml-mode))
+(setq magic-mode-alist
+      (cons '("<\\?xml " . nxml-mode)
+            magic-mode-alist))
+(fset 'xml-mode 'nxml-mode)
+(fset 'html-mode 'nxml-mode)
+
+;; Customizing
+(add-hook 'nxml-mode-hook
+          '(lambda()
+             (set-face-foreground
+              'nxml-attribute-local-name-face "#bb6600")
+             (set-face-foreground
+              'nxml-processing-instruction-delimiter-face "purple")
+             (set-face-foreground
+              'nxml-processing-instruction-target-face "purple")
+             (set-face-foreground
+              'nxml-attribute-value-delimiter-face "RosyBrown")
+             (set-face-foreground
+              'nxml-attribute-value-face "RosyBrown")))
+
 
 (defun config-auto-modes ()
   "Setup lots of modes based on extensions."
@@ -177,25 +204,6 @@ point reaches the beginning or end of the buffer, stop there."
   ;; zsh
   (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
   )
-
-(defun config-nxml-mode ()
-  (add-to-list 'auto-mode-alist
-               (cons (concat "\\." (regexp-opt '("xml" "xsd") t) "\\'")
-                     'nxml-mode))
-  (setq magic-mode-alist
-	(cons '("<\\?xml " . nxml-mode)
-	      magic-mode-alist))
-  (fset 'xml-mode 'nxml-mode)
-  (fset 'html-mode 'nxml-mode)
-
-  ;; Customizing
-  (add-hook 'nxml-mode-hook
-	    '(lambda()
-	       (set-face-foreground 'nxml-attribute-local-name-face "#bb6600")
-               (set-face-foreground 'nxml-processing-instruction-delimiter-face "purple")
-               (set-face-foreground 'nxml-processing-instruction-target-face "purple")
-               (set-face-foreground 'nxml-attribute-value-delimiter-face "RosyBrown")
-               (set-face-foreground 'nxml-attribute-value-face "RosyBrown"))))
 
 (defun config-javascript-mode ()
   (autoload 'javascript-mode "javascript" nil t))
@@ -292,9 +300,9 @@ point reaches the beginning or end of the buffer, stop there."
 (config-javascript-mode)
 (config-powershell-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CC-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'cc-mode)
 (setq tab-width 2)
 (setq-default indent-tabs-mode nil)
@@ -307,9 +315,22 @@ point reaches the beginning or end of the buffer, stop there."
 
 (add-hook 'c-initialization-hook 'my-c-initialization-hook)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun havoc-c-style()
+  "This mode is to be used when editing Metacity source code."
+  (interactive)
+  (c-set-style "gnu")
+  (c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist)
+  (setq indent-tabs-mode nil)
+  (call-interactively 'untabify))
+
+(defun epiphany-c-style()
+  "This mode is used when editing Epiphany source code."
+  (interactive)
+  (setq indent-tabs-mode t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Stupid retarted emacs defaults.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar saves-dir (expand-file-name "~/.saves/"))
 
 (setq backup-by-copying t)
@@ -324,9 +345,9 @@ point reaches the beginning or end of the buffer, stop there."
 ; use versioned backups
 (setq version-control t)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Better editing
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq kill-whole-line t)
 (setq backward-delete-char-untabify-method 'all)
 
@@ -342,26 +363,6 @@ point reaches the beginning or end of the buffer, stop there."
       (delete-char 1)
     (delete-region first-point next-point))
   )
-
-(defun havoc-c-style()
-  "This mode is to be used when editing Metacity source code."
-  (interactive)
-  (c-set-style "gnu")
-  (c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist)
-  (setq indent-tabs-mode nil)
-  (call-interactively 'untabify))
-
-(defun epiphany-c-style()
-  "This mode is used when editing Epiphany source code."
-  (interactive)
-  (setq indent-tabs-mode t))
-
-(defun nagy-python-style()
-  "This mode is used for waf code."
-  (interactive)
-  (setq python-indent 4)
-  (setq tab-width 4)
-  (setq indent-tabs-mode t))
 
 (defun config-jinja2-mode ()
   (with-library jinja2-mode ()))
@@ -439,9 +440,9 @@ by using nxml's indentation rules."
 
 (put 'downcase-region 'disabled nil)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ace-jump-mode, provisional. Not sure I like it yet
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (autoload
   'ace-jump-mode
   "ace-jump-mode"
@@ -460,19 +461,19 @@ by using nxml's indentation rules."
 (define-key global-map (kbd "C-c å") 'ace-jump-mode-pop-mark)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Strip trailing whitespace on save
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Magit
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq magit-last-seen-setup-instructions "1.4.0")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Python
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my-run-python (cmd &optional dedicated show)
   (interactive "P")
   (run-python cmd dedicated show)
@@ -481,23 +482,31 @@ by using nxml's indentation rules."
 (define-key python-mode-map "\C-c\C-p" 'my-run-python)
 (setq python-shell-interpreter "python")
 
+(defun nagy-python-style()
+  "This mode is used for waf code."
+  (interactive)
+  (setq python-indent 4)
+  (setq tab-width 4)
+  (setq indent-tabs-mode t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Java
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'java-mode-hook (lambda ()
                             (c-set-offset 'arglist-close 0)
                             (c-set-offset 'arglist-cont-nonempty '+)
                             (c-set-offset 'class-close -1)))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
     (progn
-      (add-to-list 'load-path "C:\\code\\pubwork\\orig\\factor\\misc\\fuel")
-      (setq fuel-factor-root-dir "C:\\code\\pubwork\\orig\\factor\\")
+      (add-to-list 'load-path
+                   "C:\\code\\pubwork\\orig\\factor\\misc\\fuel")
+      (setq fuel-factor-root-dir
+            "C:\\code\\pubwork\\orig\\factor\\")
       ;; Order is important!
       (prefer-coding-system 'utf-8)
       (setq default-file-name-coding-system 'latin-1))
@@ -517,21 +526,21 @@ by using nxml's indentation rules."
 (setq fuel-listener-history-size 10000)
 (setq comint-input-ignoredups t)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CoffeeScript
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (with-library coffee-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Haskell
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; (custom-set-variables
 ;;  '(haskell-mode-hook '(turn-on-haskell-indentation)))
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; grep - highlight matches
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Had to hack vc-git.el to add --color=always to the git grep command.
 (require 'grep)
 (require 'vc)
@@ -541,9 +550,9 @@ by using nxml's indentation rules."
   (other-window 1))
 (global-set-key (kbd "C-c g") 'my-vc-git-grep)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Persistent scratch
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun save-persistent-scratch ()
   (with-current-buffer (get-buffer "*scratch*")
     (write-region (point-min) (point-max) "~/.emacs.d/scratch")))
@@ -557,18 +566,18 @@ by using nxml's indentation rules."
 (load-persistent-scratch)
 (push #'save-persistent-scratch kill-emacs-hook)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
   (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/")
   (setq ispell-personal-dictionary "~/.ispell")
   (setq ispell-program-name "aspell")
   (require 'ispell))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, possibly a different init should be used on windows.
 (require 'color-theme)
 (require 'color-theme-solarized)
@@ -579,7 +588,7 @@ by using nxml's indentation rules."
   ;; Inconsolata with italic and bold variants:
   ;; https://github.com/MihailJP/Inconsolata-LGC
   (set-default-font
-   (if is-windows "Consolas-11" "Inconsolata LGC-12"))
+   (if is-windows "Consolas-11" "Inconsolata LGC-13"))
   (color-theme-initialize)
   (color-theme-solarized-dark)
   (set-face-foreground 'font-lock-constant-face "#d33682")
