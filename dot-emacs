@@ -482,6 +482,13 @@ by using nxml's indentation rules."
 (setq magit-last-seen-setup-instructions "1.4.0")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; feebleline
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; feebleline is the greatest elisp package ever.
+;; (require 'feebleline)
+;; (feebleline-default-settings)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Python
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my-run-python (cmd &optional dedicated show)
@@ -647,7 +654,7 @@ by using nxml's indentation rules."
          '("~/"
            [
             "privwork/personal/articles/qs/things-id-like-to-know.txt"
-            "pubwork/factor-orig/misc/fuel/factor-mode.el"
+            "pubwork/factor-orig/misc/fuel/fuel-help.el"
             "pubwork/factor-orig/misc/fuel/strange-syntax.factor"
             "pubwork/factor-orig/basis/ui/gestures/gestures.factor"
             "pubwork/factor-orig/basis/windows/gdi32/gdi32.factor"
