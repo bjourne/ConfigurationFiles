@@ -184,11 +184,6 @@ point reaches the beginning or end of the buffer, stop there."
   (add-to-list 'auto-mode-alist '("smb\\.conf" . samba-generic-mode))
 
   (add-to-list 'auto-mode-alist '("70-install-asterisk" . cfengine-mode))
-
-  (add-to-list 'auto-mode-alist '("SConstruct" . python-mode))
-  (add-to-list 'auto-mode-alist '("SConscript\\|wscript\\|wscript_build" . python-mode))
-  (add-to-list 'auto-mode-alist '(".jhbuildrc" . python-mode))
-
   (add-to-list 'auto-mode-alist '("access\\.conf\\'" . apache-mode))
   (add-to-list 'auto-mode-alist '("apache2\\.conf\\'" . apache-mode))
   (add-to-list 'auto-mode-alist '("httpd\\.conf\\'" . apache-mode))
@@ -506,6 +501,12 @@ by using nxml's indentation rules."
   (setq tab-width 4)
   (setq indent-tabs-mode t))
 
+;; Many auto mode alists
+(add-to-list 'auto-mode-alist
+             '("SConstruct\\|SConscript\\|wscript\\|wscript_build"
+               . python-mode))
+(add-to-list 'auto-mode-alist '(".jhbuildrc" . python-mode))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; YAML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -556,9 +557,16 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Haskell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (custom-set-variables
-;;  '(haskell-mode-hook '(turn-on-haskell-indentation)))
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Octave
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'octave)
+(add-to-list 'auto-mode-alist '("\\.m$" . octave-mode))
+(define-key octave-mode-map (kbd "C-c C-z") 'run-octave)
+(setq inferior-octave-prompt-read-only t)
+(setq octave-block-offset 4)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; grep - highlight matches
@@ -653,12 +661,10 @@ by using nxml's indentation rules."
               ])
          '("~/"
            [
-            "privwork/personal/articles/qs/things-id-like-to-know.txt"
-            "pubwork/factor-orig/misc/fuel/fuel-help.el"
-            "pubwork/factor-orig/misc/fuel/strange-syntax.factor"
-            "pubwork/factor-orig/basis/ui/gestures/gestures.factor"
+            "personal/articles/qs/things-id-like-to-know.txt"
             "pubwork/factor-orig/basis/windows/gdi32/gdi32.factor"
             "pubwork/ConfigurationFiles/dot-emacs"
+            "personal/study/sf1547/labs/labA2/prob3.m"
             ]))))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
