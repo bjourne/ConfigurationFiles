@@ -18,7 +18,6 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
-
 (setq frame-title-format "%b")
 (setq icon-title-format frame-title-format)
 
@@ -27,6 +26,49 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; I prefer to split side-by-side rather than on top and below.
 ;; TODO: code here
+
+(defun split-window-sensibly-prefer-horiz (&optional window)
+  (let ((window (or window (selected-window))))
+    (or (and (window-splittable-p window t)
+             ;; Split window horizontally
+             (with-selected-window window
+               (split-window-right)))
+        (and (window-splittable-p window)
+             ;; Split window vertically
+             (with-selected-window window
+               (split-window-below)))
+        (and
+         ;; If WINDOW is the only usable window on its frame (it is
+         ;; the only one or, not being the only one, all the other
+         ;; ones are dedicated) and is not the minibuffer window, try
+         ;; to split it horizontally disregarding the value of
+         ;; `split-height-threshold'.
+         (let ((frame (window-frame window)))
+           (or
+            (eq window (frame-root-window frame))
+            (catch 'done
+              (walk-window-tree (lambda (w)
+                                  (unless (or (eq w window)
+                                              (window-dedicated-p w))
+                                    (throw 'done nil)))
+                                frame)
+              t)))
+         (not (window-minibuffer-p window))
+         (let ((split-width-threshold 0))
+           (when (window-splittable-p window t)
+             (with-selected-window window
+               (split-window-right))))))))
+
+(defun split-window-really-sensibly (&optional win)
+  (let ((win (or win (selected-window))))
+    (if (> (window-total-width win) (* 2 (window-total-height win)))
+        (with-selected-window win (split-window-sensibly-prefer-horiz win))
+      (with-selected-window win (split-window-sensibly win)))))
+
+(setq
+   split-height-threshold 80
+   split-width-threshold 160
+   split-window-preferred-function 'split-window-really-sensibly)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
@@ -567,6 +609,17 @@ by using nxml's indentation rules."
 (define-key octave-mode-map (kbd "C-c C-z") 'run-octave)
 (setq inferior-octave-prompt-read-only t)
 (setq octave-block-offset 4)
+
+;; https://emacs.stackexchange.com/questions/15164/commented-lines-shoot-off-to-column-32-in-octave-mode
+(setq octave-mode-hook
+      (lambda() (progn
+                  (defun octave-indent-comment ()
+                    "A function for `smie-indent-functions' (which see)."
+                    (save-excursion
+                      (back-to-indentation)
+                      (cond
+                       ((octave-in-string-or-comment-p) nil)
+                       ((looking-at-p "\\(\\s<\\)\\1\\{2,\\}") 0)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; grep - highlight matches
