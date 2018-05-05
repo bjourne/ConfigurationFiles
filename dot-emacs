@@ -579,8 +579,8 @@ by using nxml's indentation rules."
     (add-to-list 'load-path "~/pubwork/factor-orig/misc/fuel")
     (setq fuel-factor-root-dir "~/pubwork/factor-orig")))
 
-(require 'factor-mode)
-(require 'fuel-mode)
+;; (require 'factor-mode)
+;; (require 'fuel-mode)
 
 (when (display-graphic-p)
     (custom-set-faces
@@ -701,24 +701,25 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Files to open
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun auto-open-paths ()
+  (cond
+   ((string-match "kth.se\\'" system-name)
+    '("~/"
+      ["/pubwork/ConfigurationFiles/dot-emacs"]))
+   ((is-windows)
+    '("C:/code"
+      ["/pubwork/ConfigurationFiles/dot-emacs"
+       "/pubwork/orig/factor/basis/windows/gdi32/gdi32.factor"
+       "/pubwork/orig/factor/misc/fuel/factor-mode.el"
+       ]))
+   (t '("~/"
+        ["pubwork/factor-orig/basis/windows/gdi32/gdi32.factor"
+         "pubwork/ConfigurationFiles/dot-emacs"
+         "personal/study/sf1547/labs/labA2/prob3.m"]))))
 (mapcar
  'find-file
- (let
-     ((open-files
-       (if is-windows
-           '("C:/code"
-             ["/pubwork/ConfigurationFiles/dot-emacs"
-              "/pubwork/orig/factor/basis/windows/gdi32/gdi32.factor"
-              "/pubwork/orig/factor/misc/fuel/factor-mode.el"
-              ])
-         '("~/"
-           [
-            "pubwork/factor-orig/basis/windows/gdi32/gdi32.factor"
-            "pubwork/ConfigurationFiles/dot-emacs"
-            "personal/study/sf1547/labs/labA2/prob3.m"
-            ]))))
+ (let ((open-files (auto-open-paths)))
    (mapcar (lambda (x) (concat (car open-files) x))
            (car (cdr open-files)))))
-
 
 (server-start)
