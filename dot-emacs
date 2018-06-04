@@ -236,9 +236,6 @@ point reaches the beginning or end of the buffer, stop there."
 
   (add-to-list 'auto-mode-alist '("\\.conf\\'" . sh-mode))
 
-  (add-to-list 'auto-mode-alist '("\\.kid\\'" . html-mode))
-  (add-to-list 'auto-mode-alist '("\\.tmpl\\'" . html-mode))
-
   (add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
   (add-to-list 'auto-mode-alist '("\\.json\\'" . javascript-mode))
 
@@ -340,9 +337,6 @@ point reaches the beginning or end of the buffer, stop there."
 (with-library apache-mode)
 
 (config-css-mode)
-
-;; Setup html-mode
-(define-key html-mode-map "\t" 'indent-according-to-mode)
 
 (config-javascript-mode)
 (config-powershell-mode)
@@ -591,6 +585,16 @@ by using nxml's indentation rules."
 (setq fuel-listener-history-size 10000)
 (setq comint-input-ignoredups t)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; HTML mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'auto-mode-alist '("\\.kid\\'" . html-mode))
+(add-to-list 'auto-mode-alist '("\\.tmpl\\'" . html-mode))
+
+;; Setup html-mode
+(define-key html-mode-map "\t" 'indent-according-to-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CoffeeScript
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (with-library coffee-mode)
@@ -621,7 +625,7 @@ by using nxml's indentation rules."
                        ((looking-at-p "\\(\\s<\\)\\1\\{2,\\}") 0)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; grep - highlight matches
+;; grep - highlight mtches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Had to hack vc-git.el to add --color=always to the git grep command.
 (require 'grep)
