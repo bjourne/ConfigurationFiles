@@ -237,9 +237,6 @@ point reaches the beginning or end of the buffer, stop there."
 
   (add-to-list 'auto-mode-alist '("\\.conf\\'" . sh-mode))
 
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
-  (add-to-list 'auto-mode-alist '("\\.json\\'" . javascript-mode))
-
   (add-to-list 'auto-mode-alist '("\\.css\\'" . css-mode))
 
   (add-to-list 'auto-mode-alist '("extensions\\.conf\\'" . conf-windows-mode))
@@ -249,9 +246,6 @@ point reaches the beginning or end of the buffer, stop there."
   ;; zsh
   (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
   )
-
-(defun config-javascript-mode ()
-  (autoload 'javascript-mode "javascript" nil t))
 
 (defun config-css-mode ()
   (with-library css-mode
@@ -338,8 +332,6 @@ point reaches the beginning or end of the buffer, stop there."
 (with-library apache-mode)
 
 (config-css-mode)
-
-(config-javascript-mode)
 (config-powershell-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -594,6 +586,13 @@ by using nxml's indentation rules."
 
 ;; Setup html-mode
 (define-key html-mode-map "\t" 'indent-according-to-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Javascript
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(autoload 'javascript-mode "javascript" nil t)
+(add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.json\\'" . javascript-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Prolog
