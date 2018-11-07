@@ -555,10 +555,6 @@ by using nxml's indentation rules."
 (add-hook 'java-mode-hook (lambda ()
                             (c-set-offset 'arglist-close 0)
                             (c-set-offset 'arglist-intro '+)
-<<<<<<< HEAD
-=======
-                            ;;(c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist)
->>>>>>> better java indent
                             (c-set-offset 'class-close -1)))
 
 
