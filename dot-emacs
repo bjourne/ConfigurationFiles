@@ -93,8 +93,9 @@
 (setq org-src-fontify-natively t
       org-export-htmlize-output-type 'css)
 (setq org-log-done t)
-(setq org-time-stamp-custom-formats
-      '("<%d/%m/%Y %a>" . "<%Y-%m-%d %H:%M>"))
+(setq-default org-display-custom-times t)
+(setq org-time-stamp-custom-formats '("<%Y-%m-%d>" . "<%Y-%m-%d %H:%M>"))
+
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -553,7 +554,7 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'java-mode-hook (lambda ()
                             (c-set-offset 'arglist-close 0)
-                            (c-set-offset 'arglist-cont-nonempty '+)
+                            (c-set-offset 'arglist-intro '+)
                             (c-set-offset 'class-close -1)))
 
 
@@ -593,6 +594,12 @@ by using nxml's indentation rules."
 
 ;; Setup html-mode
 (define-key html-mode-map "\t" 'indent-according-to-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Prolog
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+(setq prolog-indent-width 4)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CoffeeScript
@@ -676,7 +683,7 @@ by using nxml's indentation rules."
   (set-default-font
    (if is-windows "Consolas-11" "Inconsolata LGC-13"))
   (color-theme-initialize)
-  (color-theme-solarized-dark)
+  ;;(color-theme-solarized-dark)
   (set-face-foreground 'font-lock-constant-face "#d33682")
   (set-face-foreground 'font-lock-variable-name-face "#6c71c4"))
 
