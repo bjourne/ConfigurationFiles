@@ -716,7 +716,7 @@ by using nxml's indentation rules."
    ((string-match "kth.se\\'" system-name)
     '("~/"
       ["/pubwork/ConfigurationFiles/dot-emacs"]))
-   ((is-windows)
+   (is-windows
     '("C:/code"
       ["/pubwork/ConfigurationFiles/dot-emacs"
        "/pubwork/orig/factor/basis/windows/gdi32/gdi32.factor"
