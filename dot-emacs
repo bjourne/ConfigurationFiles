@@ -155,6 +155,7 @@ point reaches the beginning or end of the buffer, stop there."
            (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\")
            (setq exec-path
                  (append exec-path '("C:/Program Files (x86)/Git/bin")))
+           ;;(setenv "HOME" (concat (getenv "HOMEDRIVE") (getenv "HOMEPATH")))
            (setenv "GIT_ASKPASS" "git-gui--askpass"))
   (progn (add-to-list 'load-path (expand-file-name "~/.site-lisp/"))))
 
@@ -241,8 +242,6 @@ point reaches the beginning or end of the buffer, stop there."
 
   (add-to-list 'auto-mode-alist '("extensions\\.conf\\'" . conf-windows-mode))
   (add-to-list 'auto-mode-alist '("dot-emacs$" . emacs-lisp-mode))
-  ;; markdown
-  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
   ;; zsh
   (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
   )
@@ -609,6 +608,16 @@ by using nxml's indentation rules."
 ;; Haskell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Markdown
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'markdown-mode)
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+(setq markdown-italic-underscore nil)
+(custom-set-faces
+ '(markdown-code-face ((t (:inherit nil)))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Octave
