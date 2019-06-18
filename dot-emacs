@@ -334,13 +334,14 @@ point reaches the beginning or end of the buffer, stop there."
 (config-powershell-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CC-mode
+;; CC-mode and Java
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'cc-mode)
 (setq tab-width 2)
 (setq-default indent-tabs-mode nil)
 (setq c-basic-offset 4)
 (c-set-offset 'substatement-open 0)
+(c-set-offset 'arglist-intro '+)
 
 (defun my-c-initialization-hook ()
   (define-key c-mode-base-map (kbd "C-c C-d") nil)
@@ -360,6 +361,11 @@ point reaches the beginning or end of the buffer, stop there."
   "This mode is used when editing Epiphany source code."
   (interactive)
   (setq indent-tabs-mode t))
+
+(add-hook 'java-mode-hook (lambda ()
+                            (c-set-offset 'arglist-close 0)
+                            (c-set-offset 'arglist-intro '+)
+                            (c-set-offset 'class-close -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Stupid retarted emacs defaults.
@@ -541,15 +547,6 @@ by using nxml's indentation rules."
 (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Java
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-hook 'java-mode-hook (lambda ()
-                            (c-set-offset 'arglist-close 0)
-                            (c-set-offset 'arglist-intro '+)
-                            (c-set-offset 'class-close -1)))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if is-windows
@@ -565,8 +562,8 @@ by using nxml's indentation rules."
     (add-to-list 'load-path "~/pubwork/factor-orig/misc/fuel")
     (setq fuel-factor-root-dir "~/pubwork/factor-orig")))
 
-;; (require 'factor-mode)
-;; (require 'fuel-mode)
+(require 'factor-mode)
+(require 'fuel-mode)
 
 (when (display-graphic-p)
     (custom-set-faces
@@ -691,7 +688,7 @@ by using nxml's indentation rules."
   (set-default-font
    (if is-windows "Consolas-11" "Inconsolata LGC-13"))
   (color-theme-initialize)
-  ;;(color-theme-solarized-dark)
+  (color-theme-solarized-dark)
   (set-face-foreground 'font-lock-constant-face "#d33682")
   (set-face-foreground 'font-lock-variable-name-face "#6c71c4"))
 
@@ -733,8 +730,7 @@ by using nxml's indentation rules."
        ]))
    (t '("~/"
         ["pubwork/factor-orig/basis/windows/gdi32/gdi32.factor"
-         "pubwork/ConfigurationFiles/dot-emacs"
-         "personal/study/sf1547/labs/labA2/prob3.m"]))))
+         "pubwork/ConfigurationFiles/dot-emacs"]))))
 (mapcar
  'find-file
  (let ((open-files (auto-open-paths)))
