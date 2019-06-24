@@ -337,30 +337,19 @@ point reaches the beginning or end of the buffer, stop there."
 ;; CC-mode and Java
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'cc-mode)
+
 (setq tab-width 2)
 (setq-default indent-tabs-mode nil)
 (setq c-basic-offset 4)
-(c-set-offset 'substatement-open 0)
-(c-set-offset 'arglist-intro '+)
 
 (defun my-c-initialization-hook ()
+  (c-set-offset 'substatement-open 0)
+  (c-set-offset 'arglist-intro '+)
+  (c-set-offset 'innamespace [0])
+  ;;(c-set-style "my-cc-style")
   (define-key c-mode-base-map (kbd "C-c C-d") nil)
   (define-key c-mode-base-map (kbd "C-c C-d C-d") 'man-follow))
-
-(add-hook 'c-initialization-hook 'my-c-initialization-hook)
-
-(defun havoc-c-style()
-  "This mode is to be used when editing Metacity source code."
-  (interactive)
-  (c-set-style "gnu")
-  (c-set-offset 'arglist-cont-nonempty 'c-lineup-arglist)
-  (setq indent-tabs-mode nil)
-  (call-interactively 'untabify))
-
-(defun epiphany-c-style()
-  "This mode is used when editing Epiphany source code."
-  (interactive)
-  (setq indent-tabs-mode t))
+(add-hook 'c-mode-common-hook 'my-c-initialization-hook)
 
 (add-hook 'java-mode-hook (lambda ()
                             (c-set-offset 'arglist-close 0)
