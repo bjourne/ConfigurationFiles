@@ -173,15 +173,10 @@ point reaches the beginning or end of the buffer, stop there."
 ;; Package management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (package-initialize)
-;; Marmalade still doesn't work for me.
-;;(add-to-list 'package-archives
-;; 	     '("marmalade" .
-;; 	       "http://marmalade-repo.org/packages/"))
 (add-to-list 'package-archives
 	     '("melpa" .
 	       "http://melpa.milkbox.net/packages/"))
 (package-initialize)
-;;(package-refresh-contents)
 
 (mapcar 'package-install
         (remove-if 'package-installed-p
@@ -236,14 +231,9 @@ point reaches the beginning or end of the buffer, stop there."
   (add-to-list 'auto-mode-alist '("srm\\.conf\\'"    . apache-mode))
   (add-to-list 'auto-mode-alist '(".htaccess"   . apache-mode))
 
-  (add-to-list 'auto-mode-alist '("\\.conf\\'" . sh-mode))
-
   (add-to-list 'auto-mode-alist '("\\.css\\'" . css-mode))
 
   (add-to-list 'auto-mode-alist '("extensions\\.conf\\'" . conf-windows-mode))
-  (add-to-list 'auto-mode-alist '("dot-emacs$" . emacs-lisp-mode))
-  ;; zsh
-  (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
   )
 
 (defun config-css-mode ()
@@ -412,10 +402,6 @@ point reaches the beginning or end of the buffer, stop there."
 
 (config-jinja2-mode)
 
-;; Setup personal info. This is to make ChangeLog mode work
-(setq user-mail-address "bjourne@gmail.com")
-(setq user-full-name "Björn Lindqvist")
-
 ;; Better uniquify
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
@@ -499,6 +485,14 @@ by using nxml's indentation rules."
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Personal details
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Setup personal info. This is to make ChangeLog mode work
+(setq user-mail-address "bjourne@gmail.com")
+(setq user-full-name "Björn Lindqvist")
+(setq erc-nick "Sonderblade")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Magit
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq magit-last-seen-setup-instructions "1.4.0")
@@ -509,6 +503,18 @@ by using nxml's indentation rules."
 ;; feebleline is the greatest elisp package ever.
 ;; (require 'feebleline)
 ;; (feebleline-default-settings)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Shell
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'auto-mode-alist '("\\.conf\\'" . sh-mode))
+(add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Elisp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'auto-mode-alist '("dot-emacs$" . emacs-lisp-mode))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Python
@@ -630,7 +636,7 @@ by using nxml's indentation rules."
                        ((looking-at-p "\\(\\s<\\)\\1\\{2,\\}") 0)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; grep - highlight mtches
+;; grep - highlight matches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Had to hack vc-git.el to add --color=always to the git grep command.
 (require 'grep)
