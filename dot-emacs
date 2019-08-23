@@ -548,21 +548,23 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(if is-windows
-    (progn
-      (add-to-list 'load-path
-                   "C:\\code\\pubwork\\orig\\factor\\misc\\fuel")
-      (setq fuel-factor-root-dir
-            "C:\\code\\pubwork\\orig\\factor\\")
-      ;; Order is important!
-      (prefer-coding-system 'utf-8)
-      (setq default-file-name-coding-system 'latin-1))
-  (progn
-    (add-to-list 'load-path "/tmp/factor/factor/misc/fuel")
-    (setq fuel-factor-root-dir "/tmp/factor/factor/")))
+(let* ((factor-dirs
+        '(("bjourne-laptop" . "~/pubwork/factor-orig")
+          ("blabla" . "C:\\code\\pubwork\\orig\\factor\\")))
+       (factor-dir (file-name-as-directory (cdr (assoc (system-name) factor-dirs))))
+       (misc-dir (file-name-as-directory "misc"))
+       (fuel-dir (file-name-as-directory "fuel"))
+       (fuel-dir-full (concat factor-dir misc-dir fuel-dir)))
+  (add-to-list 'load-path fuel-dir-full)
+  (setq fuel-factor-root-dir factor-dir))
 
-;; (require 'factor-mode)
-;; (require 'fuel-mode)
+(when is-windows
+  ;; Order is important!
+  (prefer-coding-system 'utf-8)
+  (setq default-file-name-coding-system 'latin-1))
+
+(require 'factor-mode)
+(require 'fuel-mode)
 
 (when (display-graphic-p)
     (custom-set-faces
@@ -689,7 +691,6 @@ by using nxml's indentation rules."
   ;; https://github.com/MihailJP/Inconsolata-LGC
   (set-default-font
    (if is-windows "Consolas-11" "Inconsolata LGC-13"))
-  (color-theme-initialize)
   (color-theme-solarized-dark)
   (set-face-foreground 'font-lock-constant-face "#d33682")
   (set-face-foreground 'font-lock-variable-name-face "#6c71c4"))
