@@ -2,8 +2,6 @@
 ;;
 ;;	(load-file "~/pubwork/ConfigurationFiles/dot-emacs")
 ;;
-(require 'cl)
-
 (setq is-windows (string-equal system-type "windows-nt"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -172,20 +170,15 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(package-initialize)
-(add-to-list 'package-archives
-	     '("melpa" .
-	       "http://melpa.milkbox.net/packages/"))
-(package-initialize)
-
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (mapcar 'package-install
         (remove-if 'package-installed-p
                    '(clojure-mode
-                     color-theme-solarized
                      csv-mode
                      haskell-mode
                      htmlize
-                     icicles
+                     ;; Only available through the Emacs wiki
+                     ;; icicles
                      magit
                      markdown-mode
                      yaml-mode)))
@@ -339,7 +332,7 @@ point reaches the beginning or end of the buffer, stop there."
   (c-set-offset 'substatement-open 0)
   (c-set-offset 'arglist-intro '+)
   (c-set-offset 'innamespace [0])
-  (c-set-offset 'bracelist-open 0)
+  ;;(c-set-offset 'bracelist-open 0)
   ;;(c-set-style "my-cc-style")
   (define-key c-mode-base-map (kbd "C-c C-d") nil)
   (define-key c-mode-base-map (kbd "C-c C-d C-d") 'man-follow))
@@ -498,13 +491,6 @@ by using nxml's indentation rules."
 (setq magit-last-seen-setup-instructions "1.4.0")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; feebleline
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; feebleline is the greatest elisp package ever.
-;; (require 'feebleline)
-;; (feebleline-default-settings)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-to-list 'auto-mode-alist '("\\.conf\\'" . sh-mode))
@@ -548,32 +534,34 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Factor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set Factor dirs if able
 (let* ((factor-dirs
         '(("bjourne-laptop" . "~/pubwork/factor-orig")
           ("blabla" . "C:\\code\\pubwork\\orig\\factor\\")))
-       (factor-dir (file-name-as-directory (cdr (assoc (system-name) factor-dirs))))
-       (misc-dir (file-name-as-directory "misc"))
-       (fuel-dir (file-name-as-directory "fuel"))
-       (fuel-dir-full (concat factor-dir misc-dir fuel-dir)))
-  (add-to-list 'load-path fuel-dir-full)
-  (setq fuel-factor-root-dir factor-dir))
+       (factor-dir (assoc (system-name) factor-dirs)))
+  (when factor-dir
+    (add-to-list 'load-path
+                 (concat factor-dir
+                         (file-name-as-directory "misc")
+                         (file-name-as-directory "fuel")))
+    (setq fuel-factor-root-dir factor-dir)))
 
 (when is-windows
   ;; Order is important!
   (prefer-coding-system 'utf-8)
   (setq default-file-name-coding-system 'latin-1))
 
-(require 'factor-mode)
-(require 'fuel-mode)
-
-(when (display-graphic-p)
+(with-library factor-mode
+  (require 'factor-mode)
+  (require 'fuel-mode)
+  (when (display-graphic-p)
     (custom-set-faces
      '(factor-font-lock-number ((t (:foreground "tomato3"))))))
-
-(setq fuel-help-always-ask nil)
-;; Larger history
-(setq fuel-listener-history-size 10000)
-(setq comint-input-ignoredups t)
+  (setq fuel-help-always-ask nil)
+  ;; Larger history
+  (setq fuel-listener-history-size 10000)
+  (setq comint-input-ignoredups t)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; HTML mode
@@ -676,22 +664,20 @@ by using nxml's indentation rules."
 (add-to-list 'auto-mode-alist '("\\.txt\\'" . flyspell-mode))
 (setq ispell-dictionary "svenska")
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Theme, possibly a different init should be used on windows.
-(require 'color-theme)
-(require 'color-theme-solarized)
-
 (global-font-lock-mode t)
 
 (defun gui-theme ()
   ;; Inconsolata with italic and bold variants:
   ;; https://github.com/MihailJP/Inconsolata-LGC
-  (set-default-font
-   (if is-windows "Consolas-11" "Inconsolata LGC-13"))
-  (color-theme-solarized-dark)
+  (let ((preferred-fonts
+         '(("bjourne-laptop" . "Inconsolata LGC 13")
+           ("bjourne" . "Source Code Pro 13")
+           ("windows" . "Consolas-11"))))
+    (set-face-attribute 'default nil
+                        :font (cdr (assoc (system-name) preferred-fonts))))
   (set-face-foreground 'font-lock-constant-face "#d33682")
   (set-face-foreground 'font-lock-variable-name-face "#6c71c4"))
 
@@ -722,6 +708,9 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun auto-open-paths ()
   (cond
+   ((string-equal (system-name) "bjourne")
+    '("~/"
+      ["/p/ConfigurationFiles/dot-emacs"]))
    ((string-match "kth.se\\'" system-name)
     '("~/"
       ["/pubwork/ConfigurationFiles/dot-emacs"]))
