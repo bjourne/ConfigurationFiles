@@ -170,18 +170,7 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(mapcar 'package-install
-        (remove-if 'package-installed-p
-                   '(clojure-mode
-                     csv-mode
-                     haskell-mode
-                     htmlize
-                     ;; Only available through the Emacs wiki
-                     ;; icicles
-                     magit
-                     markdown-mode
-                     yaml-mode)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NXML
@@ -315,6 +304,13 @@ point reaches the beginning or end of the buffer, stop there."
 
 (config-css-mode)
 (config-powershell-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; vhdl-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'vhdl-mode)
+(setq vhdl-basic-offset 4)
+(vhdl-set-offset 'arglist-close 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CC-mode and Java
@@ -532,36 +528,44 @@ by using nxml's indentation rules."
 (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Factor
+;; Factor - Commented out for now
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set Factor dirs if able
-(let* ((factor-dirs
-        '(("bjourne-laptop" . "~/pubwork/factor-orig")
-          ("blabla" . "C:\\code\\pubwork\\orig\\factor\\")))
-       (factor-dir (assoc (system-name) factor-dirs)))
-  (when factor-dir
-    (add-to-list 'load-path
-                 (concat factor-dir
-                         (file-name-as-directory "misc")
-                         (file-name-as-directory "fuel")))
-    (setq fuel-factor-root-dir factor-dir)))
+;; (let* ((factor-dirs
+;;         '(("mydesktop" . "~/pubwork/factor")
+;;           ("blabla" . "C:\\code\\pubwork\\orig\\factor\\")))
+;;        (factor-dir (assoc (system-name) factor-dirs)))
+;;   (when factor-dir
+;;     (add-to-list 'load-path
+;;                  (concat factor-dir
+;;                          (file-name-as-directory "misc")
+;;                          (file-name-as-directory "fuel")))
+;;     (setq fuel-factor-root-dir factor-dir)))
 
-(when is-windows
-  ;; Order is important!
-  (prefer-coding-system 'utf-8)
-  (setq default-file-name-coding-system 'latin-1))
+;; (require 'factor-mode)
+;; (require 'fuel-mode)
 
-(with-library factor-mode
-  (require 'factor-mode)
-  (require 'fuel-mode)
-  (when (display-graphic-p)
-    (custom-set-faces
-     '(factor-font-lock-number ((t (:foreground "tomato3"))))))
-  (setq fuel-help-always-ask nil)
-  ;; Larger history
-  (setq fuel-listener-history-size 10000)
-  (setq comint-input-ignoredups t)
-  )
+;; (setq fuel-help-always-ask nil)
+;; ;; Larger history
+;; (setq fuel-listener-history-size 10000)
+;; (setq comint-input-ignoredups t)
+
+;; (when is-windows
+;;   ;; Order is important!
+;;   (prefer-coding-system 'utf-8)
+;;   (setq default-file-name-coding-system 'latin-1))
+
+;; (with-library factor-mode
+;;   (require 'factor-mode)
+;;   (require 'fuel-mode)
+;;   (when (display-graphic-p)
+;;     (custom-set-faces
+;;      '(factor-font-lock-number ((t (:foreground "tomato3"))))))
+;;   (setq fuel-help-always-ask nil)
+;;   ;; Larger history
+;;   (setq fuel-listener-history-size 10000)
+;;   (setq comint-input-ignoredups t)
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; HTML mode
@@ -667,6 +671,8 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Theme, possibly a different init should be used on windows.
+;;(require 'solarized-theme)
 (global-font-lock-mode t)
 
 (defun gui-theme ()
@@ -675,7 +681,8 @@ by using nxml's indentation rules."
   (let ((preferred-fonts
          '(("bjourne-laptop" . "Inconsolata LGC 13")
            ("bjourne" . "Source Code Pro 13")
-           ("windows" . "Consolas-11"))))
+           ("windows" . "Consolas-11")
+           ("mydesktop" . "Peep 14"))))
     (set-face-attribute 'default nil
                         :font (cdr (assoc (system-name) preferred-fonts))))
   (set-face-foreground 'font-lock-constant-face "#d33682")
@@ -692,7 +699,9 @@ by using nxml's indentation rules."
      '(font-lock-variable-name-face
        ((t (:foreground "cyan" :weight bold))))))
 
-(if (display-graphic-p) (gui-theme) (console-theme))
+(if (display-graphic-p)
+    (gui-theme)
+  (console-theme))
 
 (custom-set-variables)
 
@@ -702,6 +711,7 @@ by using nxml's indentation rules."
 ;; It's better to use the -mm parameter
 ;;(when is-windows (w32-send-sys-command 61488))
 (setq frame-resize-pixelwise t)
+(toggle-frame-fullscreen)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Files to open
