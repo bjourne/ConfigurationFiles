@@ -2,6 +2,7 @@
 ;;
 ;;	(load-file "~/pubwork/ConfigurationFiles/dot-emacs")
 ;;
+(require 'cl)
 (setq is-windows (string-equal system-type "windows-nt"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -171,7 +172,6 @@ point reaches the beginning or end of the buffer, stop there."
 ;; Package management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NXML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -245,6 +245,9 @@ point reaches the beginning or end of the buffer, stop there."
   (global-set-key "\C-?" 'backward-delete-char-untabify)
   (global-set-key [delete] 'delete-horizontal-space-forward)
   (global-set-key (kbd "C-c m") 'rename-file-and-buffer)
+
+  ;; Move between windows
+  (windmove-default-keybindings)
 
   ;; Ibuffer
   (global-set-key (kbd "C-x C-b") 'ibuffer))
@@ -328,6 +331,7 @@ point reaches the beginning or end of the buffer, stop there."
   (c-set-offset 'substatement-open 0)
   (c-set-offset 'arglist-intro '+)
   (c-set-offset 'innamespace [0])
+  (c-set-offset 'arglist-close 0)
   ;;(c-set-offset 'bracelist-open 0)
   ;;(c-set-style "my-cc-style")
   (define-key c-mode-base-map (kbd "C-c C-d") nil)
@@ -610,6 +614,14 @@ by using nxml's indentation rules."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; VHDL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'vhdl-mode)
+(setq vhdl-basic-offset 4)
+(vhdl-set-offset 'arglist-close 0)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Octave
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'octave)
@@ -712,6 +724,12 @@ by using nxml's indentation rules."
 ;;(when is-windows (w32-send-sys-command 61488))
 (setq frame-resize-pixelwise t)
 (toggle-frame-fullscreen)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Lustre mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'lustre-mode)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Files to open
