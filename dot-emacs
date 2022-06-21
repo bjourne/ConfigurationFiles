@@ -316,6 +316,19 @@ point reaches the beginning or end of the buffer, stop there."
 (vhdl-set-offset 'arglist-close 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; verilog-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq verilog-indent-level 4)
+(setq verilog-indent-level-module 4)
+(setq verilog-indent-level-declaration 4)
+(setq verilog-auto-lineup nil)
+(setq verilog-indent-begin-after-if nil)
+(add-hook 'verilog-mode-hook
+          (lambda ()
+            (local-unset-key [delete])
+            (local-unset-key [backspace])))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CC-mode and Java
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'cc-mode)
