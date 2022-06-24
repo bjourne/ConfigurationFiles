@@ -318,15 +318,15 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; verilog-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'verilog-mode)
 (setq verilog-indent-level 4)
 (setq verilog-indent-level-module 4)
 (setq verilog-indent-level-declaration 4)
 (setq verilog-auto-lineup nil)
 (setq verilog-indent-begin-after-if nil)
-(add-hook 'verilog-mode-hook
-          (lambda ()
-            (local-unset-key [delete])
-            (local-unset-key [backspace])))
+(setq verilog-auto-endcomments nil)
+(define-key verilog-mode-map [delete] nil)
+(define-key verilog-mode-map [backspace] nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CC-mode and Java
