@@ -309,13 +309,6 @@ point reaches the beginning or end of the buffer, stop there."
 (config-powershell-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; vhdl-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'vhdl-mode)
-(setq vhdl-basic-offset 4)
-(vhdl-set-offset 'arglist-close 0)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; verilog-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'verilog-mode)
@@ -496,7 +489,6 @@ by using nxml's indentation rules."
 ;; Setup personal info. This is to make ChangeLog mode work
 (setq user-mail-address "bjourne@gmail.com")
 (setq user-full-name "Björn Lindqvist")
-(setq erc-nick "Sonderblade")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Magit
@@ -683,7 +675,7 @@ by using nxml's indentation rules."
 (push #'save-persistent-scratch kill-emacs-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Spelling
+;; Speling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
   (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/")
@@ -691,7 +683,54 @@ by using nxml's indentation rules."
   (setq ispell-program-name "aspell")
   (require 'ispell))
 (add-to-list 'auto-mode-alist '("\\.txt\\'" . flyspell-mode))
-(setq ispell-dictionary "svenska")
+
+;; This nice code comes from https://stackoverflow.com/questions/27544869/how-do-i-change-ispell-private-dictionary
+(defface ispell-alpha-num-choice-face
+  '((t (:background "black" :foreground "red")))
+  "Face for `ispell-alpha-num-choice-face`."
+  :group 'ispell)
+
+(defface ispell-text-choice-face
+  '((t (:background "black" :foreground "forestgreen")))
+  "Face for `ispell-text-choice-face`."
+  :group 'ispell)
+
+(defun my-ispell-change-dictionaries ()
+"Switch between language dictionaries."
+(interactive)
+  (let ((choice (read-char-exclusive (concat
+          "["
+          (propertize "E" 'face 'ispell-alpha-num-choice-face)
+          "]"
+          (propertize "nglish" 'face 'ispell-text-choice-face)
+          " | ["
+          (propertize "S" 'face 'ispell-alpha-num-choice-face)
+          "]"
+          (propertize "venska" 'face 'ispell-text-choice-face)))))
+    (cond
+      ((eq choice ?E)
+        (setq flyspell-default-dictionary "english")
+        (setq ispell-dictionary "english")
+        (setq ispell-personal-dictionary "~/.config/aspell/.aspell.en.pws")
+        (ispell-kill-ispell)
+        (message "English"))
+      ((eq choice ?S)
+        (setq flyspell-default-dictionary "svenska")
+        (setq ispell-dictionary "svenska")
+        (setq ispell-personal-dictionary "~/.config/aspell/.aspell.sv.pws")
+        (ispell-kill-ispell)
+        (message "Svenska"))
+      (t (message "No changes have been made."))) ))
+
+;; Defaults
+(setq ispell-personal-dictionary "~/.config/aspell/.aspell.en.pws")
+(setq flyspell-default-dictionary "english")
+
+;; Keybinding to cycle between languages.
+(eval-after-load "flyspell"
+  '(define-key flyspell-mode-map (kbd "C-c l") 'my-ispell-change-dictionaries))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
@@ -741,7 +780,7 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lustre mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'lustre-mode)
+;; (require 'lustre-mode)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -752,18 +791,17 @@ by using nxml's indentation rules."
    ((string-equal (system-name) "bjourne")
     '("~/"
       ["/p/ConfigurationFiles/dot-emacs"]))
+   ((string-equal (system-name) "bjourne-laptop")
+    '("~/"
+      ["/p/ConfigurationFiles/dot-emacs" "/t/eng/opencl.txt"]))
    ((string-match "kth.se\\'" system-name)
     '("~/"
-      ["/pubwork/ConfigurationFiles/dot-emacs"]))
+      ["/p/ConfigurationFiles/dot-emacs"]))
    (is-windows
     '("C:/code"
-      ["/pubwork/ConfigurationFiles/dot-emacs"
-       "/pubwork/orig/factor/basis/windows/gdi32/gdi32.factor"
-       "/pubwork/orig/factor/misc/fuel/factor-mode.el"
-       ]))
+      []))
    (t '("~/"
-        ["pubwork/factor-orig/basis/windows/gdi32/gdi32.factor"
-         "pubwork/ConfigurationFiles/dot-emacs"]))))
+        []))))
 (mapcar
  'find-file
  (let ((open-files (auto-open-paths)))
