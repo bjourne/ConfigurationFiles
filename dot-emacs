@@ -724,25 +724,25 @@ by using nxml's indentation rules."
       ((eq choice ?E)
         (setq flyspell-default-dictionary "english")
         (setq ispell-dictionary "english")
-        (setq ispell-personal-dictionary "~/.config/aspell/.aspell.en.pws")
+        (setq ispell-personal-dictionary "~/.config/aspell/en.pws")
         (ispell-kill-ispell)
         (message "English"))
       ((eq choice ?S)
         (setq flyspell-default-dictionary "svenska")
         (setq ispell-dictionary "svenska")
-        (setq ispell-personal-dictionary "~/.config/aspell/.aspell.sv.pws")
+        (setq ispell-personal-dictionary "~/.config/aspell/sv.pws")
         (ispell-kill-ispell)
         (message "Svenska"))
       (t (message "No changes have been made."))) ))
 
 ;; Defaults
-(setq ispell-personal-dictionary "~/.config/aspell/.aspell.en.pws")
+(setq ispell-personal-dictionary "~/.config/aspell/en.pws")
 (setq flyspell-default-dictionary "english")
 
 ;; Keybinding to cycle between languages.
-(eval-after-load "flyspell"
-  '(define-key flyspell-mode-map (kbd "C-c l") 'my-ispell-change-dictionaries))
-
+(add-hook 'flyspell-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c l") 'my-ispell-change-dictionaries)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
