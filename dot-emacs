@@ -5,6 +5,17 @@
 (require 'cl)
 (setq is-windows (string-equal system-type "windows-nt"))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; XDG config
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq config-base "~/.config/emacs/")
+(setq user-emacs-directory (concat config-base "lisp/"))
+(setq package-user-dir (concat config-base "packages/"))
+
+;; Must call this
+(package-initialize)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -156,7 +167,7 @@ point reaches the beginning or end of the buffer, stop there."
                  (append exec-path '("C:/Program Files (x86)/Git/bin")))
            ;;(setenv "HOME" (concat (getenv "HOMEDRIVE") (getenv "HOMEPATH")))
            (setenv "GIT_ASKPASS" "git-gui--askpass"))
-  (progn (add-to-list 'load-path (expand-file-name "~/.site-lisp/"))))
+  (progn (add-to-list 'load-path (expand-file-name "~/.config/emacs/"))))
 
 (defmacro with-library (symbol &rest body)
   `(condition-case nil
@@ -661,15 +672,17 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Persistent scratch
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun save-persistent-scratch ()
   (with-current-buffer (get-buffer "*scratch*")
-    (write-region (point-min) (point-max) "~/.emacs.d/scratch")))
+    (write-region (point-min) (point-max)
+                  (concat config-base "scratch"))))
 
 (defun load-persistent-scratch ()
-  (if (file-exists-p "~/.emacs.d/scratch")
+  (if (file-exists-p (concat config-base "scratch"))
       (with-current-buffer (get-buffer "*scratch*")
         (delete-region (point-min) (point-max))
-        (insert-file "~/.emacs.d/scratch"))))
+        (insert-file (concat config-base "scratch")))))
 
 (load-persistent-scratch)
 (push #'save-persistent-scratch kill-emacs-hook)
