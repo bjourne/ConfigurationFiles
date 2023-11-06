@@ -16,6 +16,7 @@
 ;; Must call this
 (package-initialize)
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -89,6 +90,7 @@
 
 ;; This shouldn't work on Windows
 (setq dired-listing-switches "-al --group-directories-first")
+(setf dired-kill-when-opening-new-dired-buffer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
@@ -333,7 +335,7 @@ point reaches the beginning or end of the buffer, stop there."
 (define-key verilog-mode-map [backspace] nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CC-mode and Java
+;; C-mode, Java, etc.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'cc-mode)
 
@@ -341,8 +343,17 @@ point reaches the beginning or end of the buffer, stop there."
 (setq-default indent-tabs-mode nil)
 (setq c-basic-offset 4)
 
-; Many .h files are c++ headers
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+(mapcar
+ (lambda (x)
+   (let* ((mode (car x))
+          (exts (cdr x))
+          (rx (concat "\\." (regexp-opt (append exts nil)) "\\'")))
+
+     (add-to-list 'auto-mode-alist
+                  `(,rx . ,mode))
+   ))
+ '((c++-mode .  ["h"])
+   (c-mode . ["cl" "cu"])))
 
 (defun my-c-initialization-hook ()
   (c-set-offset 'substatement-open 0)
@@ -361,7 +372,7 @@ point reaches the beginning or end of the buffer, stop there."
                             (c-set-offset 'class-close -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Auto saving backups. Stupid retarted emacs defaults.
+;; Auto saving backups. Stupid retarted emacs defaults. Why so angry?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar saves-dir (expand-file-name "~/.saves/"))
 
@@ -540,7 +551,6 @@ by using nxml's indentation rules."
 (add-to-list 'auto-mode-alist
              '("SConstruct\\|SConscript\\|wscript\\|wscript_build"
                . python-mode))
-(add-to-list 'auto-mode-alist '(".jhbuildrc" . python-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; YAML
