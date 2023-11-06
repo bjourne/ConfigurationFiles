@@ -29,7 +29,7 @@ alias df='df -h'
 alias mv='mv -v'
 alias rm='rm -v'
 alias cp='cp -v'
-alias grep='grep -n'
+alias grep='grep -n --color=auto'
 alias less='less -N'
 alias egrep="egrep --color=auto"
 #alias ls='ls -lAh --group-directories-first --color=always'
