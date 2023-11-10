@@ -34,6 +34,7 @@ alias less='less -N'
 alias egrep="egrep --color=auto"
 #alias ls='ls -lAh --group-directories-first --color=always'
 alias ls='eza -lAh --group-directories-first'
+alias pstree='pstree -T -p -h -C age'
 
 setopt nobanghist
 setopt nocaseglob
