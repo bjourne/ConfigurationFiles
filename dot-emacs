@@ -698,14 +698,18 @@ by using nxml's indentation rules."
 (push #'save-persistent-scratch kill-emacs-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Speling
+;; Spelling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
   (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/")
   (setq ispell-personal-dictionary "~/.ispell")
   (setq ispell-program-name "aspell")
   (require 'ispell))
-(add-to-list 'auto-mode-alist '("\\.txt\\'" . flyspell-mode))
+
+(add-hook 'text-mode-hook 'flyspell-mode)
+(setq ispell-dictionary "english")
+(setq flyspell-default-dictionary "english")
+(setq flyspell-issue-message-flag nil)
 
 ;; This nice code comes from https://stackoverflow.com/questions/27544869/how-do-i-change-ispell-private-dictionary
 (defface ispell-alpha-num-choice-face
@@ -732,28 +736,22 @@ by using nxml's indentation rules."
           (propertize "venska" 'face 'ispell-text-choice-face)))))
     (cond
       ((eq choice ?E)
-        (setq flyspell-default-dictionary "english")
-        (setq ispell-dictionary "english")
         (setq ispell-personal-dictionary "~/.config/aspell/en.pws")
-        (ispell-kill-ispell)
+        (ispell-change-dictionary "en")
+	(flyspell-buffer)
         (message "English"))
       ((eq choice ?S)
-        (setq flyspell-default-dictionary "svenska")
-        (setq ispell-dictionary "svenska")
         (setq ispell-personal-dictionary "~/.config/aspell/sv.pws")
-        (ispell-kill-ispell)
+        (ispell-change-dictionary "sv")
+	(flyspell-buffer)
         (message "Svenska"))
       (t (message "No changes have been made."))) ))
-
-;; Defaults
-(setq ispell-personal-dictionary "~/.config/aspell/en.pws")
-(setq flyspell-default-dictionary "english")
 
 ;; Keybinding to cycle between languages.
 (add-hook 'flyspell-mode-hook
           (lambda ()
-            (local-set-key (kbd "C-c l") 'my-ispell-change-dictionaries)))
-
+            (local-set-key (kbd "C-c l") 'my-ispell-change-dictionaries)
+	    (local-set-key (kbd "C-c c") 'flyspell-correct-word-before-point)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
