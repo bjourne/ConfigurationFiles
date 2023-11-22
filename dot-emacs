@@ -325,12 +325,14 @@ point reaches the beginning or end of the buffer, stop there."
 ;; verilog-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'verilog-mode)
-(setq verilog-indent-level 4)
-(setq verilog-indent-level-module 4)
-(setq verilog-indent-level-declaration 4)
-(setq verilog-auto-lineup nil)
-(setq verilog-indent-begin-after-if nil)
 (setq verilog-auto-endcomments nil)
+(setq verilog-auto-lineup nil)
+(setq verilog-cexp-indent 4)
+(setq verilog-indent-begin-after-if nil)
+(setq verilog-indent-level 4)
+(setq verilog-indent-level-declaration 4)
+(setq verilog-indent-level-module 4)
+(setq verilog-indent-lists nil)
 (define-key verilog-mode-map [delete] nil)
 (define-key verilog-mode-map [backspace] nil)
 
@@ -707,11 +709,8 @@ by using nxml's indentation rules."
   (require 'ispell))
 
 (add-hook 'text-mode-hook 'flyspell-mode)
-(setq ispell-dictionary "english")
-(setq flyspell-default-dictionary "english")
 (setq flyspell-issue-message-flag nil)
 
-;; This nice code comes from https://stackoverflow.com/questions/27544869/how-do-i-change-ispell-private-dictionary
 (defface ispell-alpha-num-choice-face
   '((t (:background "black" :foreground "red")))
   "Face for `ispell-alpha-num-choice-face`."
@@ -722,34 +721,41 @@ by using nxml's indentation rules."
   "Face for `ispell-text-choice-face`."
   :group 'ispell)
 
+(defun set-language (code name)
+  (let* ((dir (expand-file-name "~/.config/aspell/"))
+         (pd (concat dir code ".pws"))
+         (rd (concat dir code ".prepl")))
+    (make-directory dir t)
+    (setq ispell-personal-dictionary pd)
+    (setq ispell-extra-args (list "--repl" rd)))
+  (ispell-change-dictionary code)
+  (flyspell-buffer)
+  (message (format "Switched to %s" name)))
+
+;; This nice code comes from https://stackoverflow.com/questions/27544869/how-do-i-change-ispell-private-dictionary
 (defun my-ispell-change-dictionaries ()
-"Switch between language dictionaries."
-(interactive)
+  "Switch between language dictionaries."
+  (interactive)
   (let ((choice (read-char-exclusive (concat
-          "["
-          (propertize "E" 'face 'ispell-alpha-num-choice-face)
-          "]"
-          (propertize "nglish" 'face 'ispell-text-choice-face)
-          " | ["
-          (propertize "S" 'face 'ispell-alpha-num-choice-face)
-          "]"
-          (propertize "venska" 'face 'ispell-text-choice-face)))))
+                                      "["
+                                      (propertize "E" 'face 'ispell-alpha-num-choice-face)
+                                      "]"
+                                      (propertize "nglish" 'face 'ispell-text-choice-face)
+                                      " | ["
+                                      (propertize "S" 'face 'ispell-alpha-num-choice-face)
+                                      "]"
+                                      (propertize "venska" 'face 'ispell-text-choice-face)))))
     (cond
-      ((eq choice ?E)
-        (setq ispell-personal-dictionary "~/.config/aspell/en.pws")
-        (ispell-change-dictionary "en")
-	(flyspell-buffer)
-        (message "English"))
-      ((eq choice ?S)
-        (setq ispell-personal-dictionary "~/.config/aspell/sv.pws")
-        (ispell-change-dictionary "sv")
-	(flyspell-buffer)
-        (message "Svenska"))
-      (t (message "No changes have been made."))) ))
+     ((eq choice ?E)
+      (set-language "en" "English"))
+     ((eq choice ?S)
+      (set-language "sv" "Svenska"))
+     (t (message "No changes have been made."))) ))
 
 ;; Keybinding to cycle between languages.
 (add-hook 'flyspell-mode-hook
           (lambda ()
+            (set-language "en" "English")
             (local-set-key (kbd "C-c l") 'my-ispell-change-dictionaries)
 	    (local-set-key (kbd "C-c c") 'flyspell-correct-word-before-point)))
 
