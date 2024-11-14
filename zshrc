@@ -1,3 +1,5 @@
+zstyle ':omz:update' frequency 64
+
 # If you come from bash you might have to change your $PATH.
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -6,23 +8,17 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="bureau"
 
-# Idk my default sort order is crap.
-export LC_COLLATE=C
-
 plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
-# Idk my default sort order is crap.
-export LC_COLLATE=C
-export LANG=en_US.UTF-8
-
 # Directory sizes
 alias duf='du -sk * | sort -n | while read size fname; do for unit in k M G T P E Z Y; do if [ $size -lt 1024 ]; then echo -e "${size}${unit}\t${fname}"; break; fi; size=$((size/1024)); done; done'
-alias duf2='du -sk * | sort -n | perl -ne '\''($s,$f)=split(m{\t});for (qw(K M G)) {if($s<1024) {printf("%.1f",$s);print "$_\t$f"; last};$s=$s/1024}'\'
+alias duf2='du -sk * 2>/dev/null | sort -n | perl -ne '\''($s,$f)=split(m{\t});for (qw(K M G)) {if($s<1024) {printf("%4.1f",$s);print "$_\t$f"; last};$s=$s/1024}'\'
 
 # History
 export HISTSIZE=500000
+export HIST_STAMPS="yyyy-mm-dd"
 export SAVEHIST=500000
 
 alias df='df -h'
