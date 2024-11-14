@@ -522,8 +522,9 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.conf\\'" . sh-mode))
-(add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
+(add-to-list 'auto-mode-alist '("\\.conf$" . sh-mode))
+(add-to-list 'auto-mode-alist '("\\.zsh$" . sh-mode))
+(add-to-list 'auto-mode-alist '("\\(/\\|\\`\\)zshrc$" . sh-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Elisp
@@ -558,46 +559,6 @@ by using nxml's indentation rules."
 ;; YAML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Factor - Commented out for now
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Set Factor dirs if able
-;; (let* ((factor-dirs
-;;         '(("mydesktop" . "~/pubwork/factor")
-;;           ("blabla" . "C:\\code\\pubwork\\orig\\factor\\")))
-;;        (factor-dir (assoc (system-name) factor-dirs)))
-;;   (when factor-dir
-;;     (add-to-list 'load-path
-;;                  (concat factor-dir
-;;                          (file-name-as-directory "misc")
-;;                          (file-name-as-directory "fuel")))
-;;     (setq fuel-factor-root-dir factor-dir)))
-
-;; (require 'factor-mode)
-;; (require 'fuel-mode)
-
-;; (setq fuel-help-always-ask nil)
-;; ;; Larger history
-;; (setq fuel-listener-history-size 10000)
-;; (setq comint-input-ignoredups t)
-
-;; (when is-windows
-;;   ;; Order is important!
-;;   (prefer-coding-system 'utf-8)
-;;   (setq default-file-name-coding-system 'latin-1))
-
-;; (with-library factor-mode
-;;   (require 'factor-mode)
-;;   (require 'fuel-mode)
-;;   (when (display-graphic-p)
-;;     (custom-set-faces
-;;      '(factor-font-lock-number ((t (:foreground "tomato3"))))))
-;;   (setq fuel-help-always-ask nil)
-;;   ;; Larger history
-;;   (setq fuel-listener-history-size 10000)
-;;   (setq comint-input-ignoredups t)
-;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; HTML mode
@@ -708,7 +669,8 @@ by using nxml's indentation rules."
   (setq ispell-program-name "aspell")
   (require 'ispell))
 
-(add-hook 'text-mode-hook 'flyspell-mode)
+;; Emacs spell-checking is unusable. :(
+;; (add-hook 'text-mode-hook 'flyspell-mode)
 (setq flyspell-issue-message-flag nil)
 
 (defface ispell-alpha-num-choice-face
@@ -770,10 +732,13 @@ by using nxml's indentation rules."
   ;; Inconsolata with italic and bold variants:
   ;; https://github.com/MihailJP/Inconsolata-LGC
   (let ((preferred-fonts
-         '(("bjourne-laptop" . "Inconsolata LGC 13")
+         '(
+           ;;("bjourne-laptop" . "Inconsolata LGC 13")
+           ("bjourne-laptop" . "Monaco 18")
            ("bjourne" . "Source Code Pro 13")
            ("windows" . "Consolas-11")
-           ("mydesktop" . "Peep 14"))))
+           ("mydesktop" . "Peep 14")
+           )))
     (set-face-attribute 'default nil
                         :font (cdr (assoc (system-name) preferred-fonts))))
   (set-face-foreground 'font-lock-constant-face "#d33682")
@@ -805,12 +770,6 @@ by using nxml's indentation rules."
 (toggle-frame-fullscreen)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Lustre mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (require 'lustre-mode)
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Files to open
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun auto-open-paths ()
@@ -820,7 +779,7 @@ by using nxml's indentation rules."
       ["/p/ConfigurationFiles/dot-emacs"]))
    ((string-equal (system-name) "bjourne-laptop")
     '("~/"
-      ["/p/ConfigurationFiles/dot-emacs" "/t/eng/opencl.txt"]))
+      ["/p/ConfigurationFiles/dot-emacs" "/p/ConfigurationFiles/zshrc"]))
    ((string-match "kth.se\\'" system-name)
     '("~/"
       ["/p/ConfigurationFiles/dot-emacs"]))
