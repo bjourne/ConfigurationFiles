@@ -8,8 +8,6 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="bureau"
 
-plugins=(git)
-
 source $ZSH/oh-my-zsh.sh
 
 # Directory sizes
@@ -26,8 +24,8 @@ alias cp='cp -v'
 alias df='df -h'
 alias diff='diff --color=always -u'
 alias egrep="egrep --color=auto"
-alias grep='grep -n --color=auto'ee
-alias history='history -i'
+alias grep='grep -n --color=auto'
+alias history='fc -i -l -D -1000'
 alias less='less -N'
 alias ls='eza -lAh --group-directories-first'
 alias mv='mv -v'
