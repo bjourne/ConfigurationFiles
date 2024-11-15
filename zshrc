@@ -24,14 +24,15 @@ export SAVEHIST=500000
 
 alias cp='cp -v'
 alias df='df -h'
+alias diff='diff --color=always'
 alias egrep="egrep --color=auto"
 alias grep='grep -n --color=auto'ee
 alias history='history -i'
 alias less='less -N'
 alias ls='eza -lAh --group-directories-first'
 alias mv='mv -v'
-alias rm='rm -v'
 alias pstree='pstree -T -p -h -C age'
+alias rm='rm -v'
 
 setopt nobanghist
 setopt nocaseglob
