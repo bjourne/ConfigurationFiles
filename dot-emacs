@@ -14,6 +14,8 @@
 (setq package-user-dir (concat config-base "packages/"))
 
 ;; Must call this
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
 
@@ -362,6 +364,7 @@ point reaches the beginning or end of the buffer, stop there."
   (c-set-offset 'arglist-intro '+)
   (c-set-offset 'innamespace [0])
   (c-set-offset 'arglist-close 0)
+  (c-set-offset 'cpp-macro 0)
   ;;(c-set-offset 'bracelist-open 0)
   ;;(c-set-style "my-cc-style")
   (define-key c-mode-base-map (kbd "C-c C-d") nil)
@@ -719,7 +722,7 @@ by using nxml's indentation rules."
           (lambda ()
             (set-language "en" "English")
             (local-set-key (kbd "C-c l") 'my-ispell-change-dictionaries)
-	    (local-set-key (kbd "C-c c") 'flyspell-correct-word-before-point)))
+            (local-set-key (kbd "C-c a") 'flyspell-correct-word-before-point)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.

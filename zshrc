@@ -24,7 +24,7 @@ export SAVEHIST=500000
 
 alias cp='cp -v'
 alias df='df -h'
-alias diff='diff --color=always'
+alias diff='diff --color=always -u'
 alias egrep="egrep --color=auto"
 alias grep='grep -n --color=auto'ee
 alias history='history -i'
