@@ -377,6 +377,96 @@ point reaches the beginning or end of the buffer, stop there."
                             (c-set-offset 'class-close -1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; c-ts-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my-c-ts-indent-style ()
+  (let ((ofs c-ts-mode-indent-offset)
+        (half-ofs (/ c-ts-mode-indent-offset 2)))
+    `(
+      ;; Always put these at col 0
+      ((parent-is "translation_unit") column-0 0)
+
+      ;; Preprocessor directives
+      ((node-is "preproc_arg") column-0 ,ofs)
+      ((node-is "preproc") column-0 0)
+
+      ;; Tertiary exprs
+      ((node-is ":") (nth-sibling 1) 0)
+
+      ;; Switch/case
+      ((node-is "case") standalone-parent 0)
+      ((parent-is "case_statement") standalone-parent ,ofs)
+
+      ;; Goto labels
+      ((node-is "labeled_statement") standalone-parent ,half-ofs)
+
+      ;; Like "retract"
+      ((node-is ")") parent-bol 0)
+      ((node-is "}") standalone-parent 0)
+      ((parent-is "\\`declaration\\'") parent-bol 0)
+
+      ;; Magic stuff
+      (c-ts-mode--for-each-tail-body-matcher prev-line ,ofs)
+      (c-ts-mode--else-heuristic prev-line ,ofs)
+
+      ;; For statements
+      ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
+      ((query "(for_statement condition: (_) @indent)") parent-bol 5)
+      ((query "(for_statement update: (_) @indent)") parent-bol 5)
+
+      ;; If statements
+      ((node-is "else") parent-bol 0)
+      ((parent-is "if_statement") standalone-parent ,ofs)
+      ((parent-is "else_clause") standalone-parent ,ofs)
+
+      ;; While
+      ((parent-is "while_statement") standalone-parent ,ofs)
+
+      ;; Multi-line strings
+      ((parent-is "concatenated_string") first-sibling 0)
+
+      ;; Linup indentation or one-level indentation
+      ((match nil "enumerator_list" nil 0 1) parent-bol ,ofs)
+      ((match nil "enumerator_list" nil 2 nil) (nth-sibling 1) 0)
+
+      ((match nil "parameter_list" nil 0 1) parent-bol ,ofs)
+      ((match nil "parameter_list" nil 2 nil) (nth-sibling 1) 0)
+
+      ((match nil "argument_list" nil 0 1) parent-bol ,ofs)
+      ((match nil "argument_list" nil 2 nil) (nth-sibling 1) 0)
+
+      ((match nil "initializer_list" nil 0 1) parent-bol ,ofs)
+      ((match nil "initializer_list" nil 2 nil) (nth-sibling 1) 0)
+
+      ((match nil "field_declaration_list" nil 0 1) parent-bol ,ofs)
+      ((match nil "field_declaration_list" nil 2 nil) (nth-sibling 1) 0)
+
+      ((match nil "parenthesized_expression" nil 0 1) parent-bol ,ofs)
+      ((match nil "parenthesized_expression" nil 2 nil) (nth-sibling 1) 0)
+
+      ;; IDK
+      ((parent-is "binary_expression") parent 0)
+
+      ;; Body
+      ((parent-is "compound_statement") standalone-parent ,ofs)
+      )
+    )
+  )
+
+(use-package c-ts-mode
+  :if (treesit-language-available-p 'c)
+  :custom
+  (c-ts-mode-indent-offset 4)
+  (c-ts-mode-indent-style #'my-c-ts-indent-style)
+  :init
+  ;; Remap the standard C/C++ modes
+  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Stupid retarted emacs defaults. Why so angry?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar saves-dir (expand-file-name "~/.saves/"))
