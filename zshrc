@@ -17,7 +17,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Directory sizes, (ls --total-size works better)
 alias duf='du -sk * | sort -n | while read size fname; do for unit in k M G T P E Z Y; do if [ $size -lt 1024 ]; then echo -e "${size}${unit}\t${fname}"; break; fi; size=$((size/1024)); done; done'
-alias duf2='du -sk * 2>/dev/null | sort -n | perl -ne '\''($s,$f)=split(m{\t});for (qw(K M G)) {if($s<1024) {printf("%4.1f",$s);print "$_\t$f"; last};$s=$s/1024}'\'
+alias duf2='du -sk * 2>/dev/null | sort -n | perl -ne '\''($s,$f)=split(m{\t});for (qw(K M G)) {if($s<1024) {printf("%7.1f",$s);print "$_   $f"; last};$s=$s/1024}'\'
 
 # History
 export HISTFILE=~/.local/state/zsh_history
