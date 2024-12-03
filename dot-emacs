@@ -379,6 +379,8 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; c-ts-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Preprocessor directives are annoying.
 (defun my-c-ts-indent-style ()
   (let ((ofs c-ts-mode-indent-offset)
         (half-ofs (/ c-ts-mode-indent-offset 2)))
@@ -389,6 +391,20 @@ point reaches the beginning or end of the buffer, stop there."
       ;; Preprocessor directives
       ((node-is "preproc_arg") column-0 ,ofs)
       ((node-is "preproc") column-0 0)
+      ((node-is "#endif") column-0 0)
+
+      ;; Body
+      ((parent-is "compound_statement") standalone-parent ,ofs)
+
+      ;; Stupid hack for preprocessor
+      ((n-p-gp nil "preproc" "compound_statement") standalone-parent ,ofs)
+
+      ;; Magic stuff
+      (c-ts-mode--for-each-tail-body-matcher prev-line ,ofs)
+      (c-ts-mode--else-heuristic prev-line ,ofs)
+
+      ;; This rule matches foo = \\nblah.
+      ((parent-is "assignment_expression") parent-bol ,ofs)
 
       ;; Tertiary exprs
       ((node-is ":") (nth-sibling 1) 0)
@@ -405,9 +421,7 @@ point reaches the beginning or end of the buffer, stop there."
       ((node-is "}") standalone-parent 0)
       ((parent-is "\\`declaration\\'") parent-bol 0)
 
-      ;; Magic stuff
-      (c-ts-mode--for-each-tail-body-matcher prev-line ,ofs)
-      (c-ts-mode--else-heuristic prev-line ,ofs)
+
 
       ;; For statements
       ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
@@ -446,9 +460,6 @@ point reaches the beginning or end of the buffer, stop there."
 
       ;; IDK
       ((parent-is "binary_expression") parent 0)
-
-      ;; Body
-      ((parent-is "compound_statement") standalone-parent ,ofs)
       )
     )
   )
@@ -828,7 +839,7 @@ by using nxml's indentation rules."
          '(
            ;;("bjourne-laptop" . "Inconsolata LGC 13")
            ("bjourne-laptop" . "Monaco 18")
-           ("bjourne" . "Source Code Pro 13")
+           ("bjourne" . "Source Code Pro 22")
            ("windows" . "Consolas-11")
            ("mydesktop" . "Peep 14")
            )))
@@ -869,7 +880,7 @@ by using nxml's indentation rules."
   (cond
    ((string-equal (system-name) "bjourne")
     '("~/"
-      ["/p/ConfigurationFiles/dot-emacs"]))
+      ["/p/ConfigurationFiles/dot-emacs" "/c/c/indent.c"]))
    ((string-equal (system-name) "bjourne-laptop")
     '("~/"
       ["/p/ConfigurationFiles/dot-emacs" "/p/ConfigurationFiles/zshrc"]))
