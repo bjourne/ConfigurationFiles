@@ -393,9 +393,13 @@ point reaches the beginning or end of the buffer, stop there."
       ((node-is "preproc") column-0 0)
       ((node-is "#endif") column-0 0)
 
+      ;; Like "retract"
+      ((node-is ")") parent-bol 0)
+      ((node-is "}") standalone-parent 0)
+      ((parent-is "\\`declaration\\'") parent-bol 0)
+
       ;; Body
       ((parent-is "compound_statement") standalone-parent ,ofs)
-
       ;; Stupid hack for preprocessor
       ((n-p-gp nil "preproc" "compound_statement") standalone-parent ,ofs)
 
@@ -415,13 +419,6 @@ point reaches the beginning or end of the buffer, stop there."
 
       ;; Goto labels
       ((node-is "labeled_statement") standalone-parent ,half-ofs)
-
-      ;; Like "retract"
-      ((node-is ")") parent-bol 0)
-      ((node-is "}") standalone-parent 0)
-      ((parent-is "\\`declaration\\'") parent-bol 0)
-
-
 
       ;; For statements
       ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
