@@ -461,16 +461,17 @@ point reaches the beginning or end of the buffer, stop there."
     )
   )
 
-(use-package c-ts-mode
-  :if (treesit-language-available-p 'c)
-  :custom
-  (c-ts-mode-indent-offset 4)
-  (c-ts-mode-indent-style #'my-c-ts-indent-style)
-  :init
-  ;; Remap the standard C/C++ modes
-  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
+(when (fboundp 'use-package)
+  (use-package c-ts-mode
+               :if (treesit-language-available-p 'c)
+               :custom
+               (c-ts-mode-indent-offset 4)
+               (c-ts-mode-indent-style #'my-c-ts-indent-style)
+               :init
+               ;; Remap the standard C/C++ modes
+               (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+               (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
+               (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode))))
 
 
 
@@ -857,8 +858,8 @@ by using nxml's indentation rules."
        ((t (:foreground "cyan" :weight bold))))))
 
 (if (display-graphic-p)
-    (gui-theme)
-  (console-theme))
+   (gui-theme)
+ (console-theme))
 
 (custom-set-variables)
 
@@ -883,7 +884,7 @@ by using nxml's indentation rules."
       ["/p/ConfigurationFiles/dot-emacs" "/p/ConfigurationFiles/zshrc"]))
    ((string-match "kth.se\\'" system-name)
     '("~/"
-      ["/p/ConfigurationFiles/dot-emacs"]))
+      ["/pubwork/ConfigurationFiles/dot-emacs"]))
    (is-windows
     '("C:/code"
       []))
