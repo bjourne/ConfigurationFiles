@@ -5,7 +5,6 @@
 (require 'cl)
 (setq is-windows (string-equal system-type "windows-nt"))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; XDG config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14,9 +13,11 @@
 (setq package-user-dir (concat config-base "packages/"))
 
 ;; Must call this
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -461,17 +462,20 @@ point reaches the beginning or end of the buffer, stop there."
     )
   )
 
-(when (fboundp 'use-package)
+(when (foundp 'use-package)
   (use-package c-ts-mode
-               :if (treesit-language-available-p 'c)
-               :custom
-               (c-ts-mode-indent-offset 4)
-               (c-ts-mode-indent-style #'my-c-ts-indent-style)
-               :init
-               ;; Remap the standard C/C++ modes
-               (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
-               (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
-               (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode))))
+  :if (treesit-language-available-p 'c)
+  :custom
+  (c-ts-mode-indent-offset 4)
+  (c-ts-mode-indent-style #'my-c-ts-indent-style)
+  :init
+  ;; Remap the standard C/C++ modes
+  (add-to-list 'major-mode-remap-alist
+               '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(c++-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(c-or-c++-mode . c-or-c++-ts-mode))))
 
 
 
@@ -619,7 +623,10 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Magit
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq magit-last-seen-setup-instructions "1.4.0")
+(use-package magit
+  :ensure t
+  :init
+  (setq magit-last-seen-setup-instructions "1.4.0"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shell
@@ -732,7 +739,7 @@ by using nxml's indentation rules."
                        ((octave-in-string-or-comment-p) nil)
                        ((looking-at-p "\\(\\s<\\)\\1\\{2,\\}") 0)))))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; grep - highlight matches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Had to hack vc-git.el to add --color=always to the git grep command.
@@ -833,11 +840,14 @@ by using nxml's indentation rules."
 (defun gui-theme ()
   ;; Inconsolata with italic and bold variants:
   ;; https://github.com/MihailJP/Inconsolata-LGC
+  ;; Comic Mono:
+  ;; https://github.com/dtinth/comic-mono-font
   (let ((preferred-fonts
          '(
-           ;;("bjourne-laptop" . "Inconsolata LGC 13")
-           ("bjourne-laptop" . "Monaco 18")
-           ("bjourne" . "Source Code Pro 22")
+           ;;("bjourne-laptop" . "Inconsolata LGC 12")
+           ;;("bjourne-laptop" . "Monaco 18")
+           ;;("bjourne" . "Comic Mono 12")
+           ("bjourne" . "Inconsolata LGC 12")
            ("windows" . "Consolas-11")
            ("mydesktop" . "Peep 14")
            )))
@@ -859,9 +869,10 @@ by using nxml's indentation rules."
 
 (if (display-graphic-p)
    (gui-theme)
- (console-theme))
-
-(custom-set-variables)
+  (console-theme))
+(load-theme 'solarized-dark)
+(setq-default line-spacing 8)
+;;(custom-set-variables)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Frame configuration
@@ -878,7 +889,8 @@ by using nxml's indentation rules."
   (cond
    ((string-equal (system-name) "bjourne")
     '("~/"
-      ["/p/ConfigurationFiles/dot-emacs" "/c/c/indent.c"]))
+      ["/p/ConfigurationFiles/dot-emacs"
+       ]))
    ((string-equal (system-name) "bjourne-laptop")
     '("~/"
       ["/p/ConfigurationFiles/dot-emacs" "/p/ConfigurationFiles/zshrc"]))
