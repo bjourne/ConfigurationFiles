@@ -1,6 +1,6 @@
 # Copyright (C) 2024-2025 Björn A. Lindqvist <bjourne@gmail.com>
 
-# Hidden files is a terrible concept.
+# Hidden files is a terrible idea.
 setopt globdots
 setopt nobanghist
 
@@ -40,6 +40,7 @@ mkdir -p ~/.config/ipython
 mkdir -p ~/.config/git
 touch ~/.config/git/config
 export MPLAYER_HOME=~/.config/mplayer
+export PYTHON_HISTORY=~/.local/state/python_history
 
 
 

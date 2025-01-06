@@ -488,7 +488,7 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Stupid retarted emacs defaults. Why so angry?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar saves-dir (expand-file-name "~/.saves/"))
+(defvar saves-dir (expand-file-name "~/.local/state/emacs/"))
 
 (setq backup-by-copying t)
 (setq backup-directory-alist `((".*" . ,saves-dir)))
