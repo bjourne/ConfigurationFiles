@@ -13,8 +13,8 @@
 (setq package-user-dir (concat config-base "packages/"))
 
 ;; Must call this
-(package-initialize)
 (require 'package)
+(package-initialize)
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
 
@@ -357,8 +357,8 @@ point reaches the beginning or end of the buffer, stop there."
      (add-to-list 'auto-mode-alist
                   `(,rx . ,mode))
    ))
- '((c++-mode .  ["h"])
-   (c-mode . ["cl" "cu"])))
+ '((c++-mode .  ["h" "cuh" "cu"])
+   (c-mode . ["cl"])))
 
 (defun my-c-initialization-hook ()
   (c-set-offset 'substatement-open 0)
@@ -388,6 +388,9 @@ point reaches the beginning or end of the buffer, stop there."
     `(
       ;; Always put these at col 0
       ((parent-is "translation_unit") column-0 0)
+
+      ;; Don't indent function names
+      ((node-is "function_declarator") column-0 0)
 
       ;; Preprocessor directives
       ((node-is "preproc_arg") column-0 ,ofs)
@@ -462,7 +465,7 @@ point reaches the beginning or end of the buffer, stop there."
     )
   )
 
-(when (foundp 'use-package)
+(when (fboundp 'use-package)
   (use-package c-ts-mode
   :if (treesit-language-available-p 'c)
   :custom
@@ -890,6 +893,7 @@ by using nxml's indentation rules."
    ((string-equal (system-name) "bjourne")
     '("~/"
       ["/p/ConfigurationFiles/dot-emacs"
+       "/p/ConfigurationFiles/zshrc"
        ]))
    ((string-equal (system-name) "bjourne-laptop")
     '("~/"
