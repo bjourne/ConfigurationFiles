@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Björn A. Lindqvist <bjourne@gmail.com>
+# Copyright (C) 2024-2025 Björn A. Lindqvist <bjourne@gmail.com>
 
 # Hidden files is a terrible concept.
 setopt globdots
@@ -48,7 +48,7 @@ alias df='df -h'
 alias diff='diff --color=always -u'
 alias egrep="egrep --color=auto"
 alias grep='grep -n --color=auto'
-alias history='fc -i -l -D -1000'
+alias history='fc -i -l -D 0'
 alias less='less -N -F'
 alias ls='eza -lA --group-directories-first --time-style=relative'
 alias mv='mv -v'
