@@ -42,6 +42,10 @@ touch ~/.config/git/config
 export MPLAYER_HOME=~/.config/mplayer
 export PYTHON_HISTORY=~/.local/state/python_history
 
+export TEXMFHOME=~/.local/share/texmf
+export TEXMFVAR=~/.cache/texlive/texmf-var
+export TEXMFCONFIG=~/.config/texlive/texmf-config
+
 
 
 alias cp='cp -v'
