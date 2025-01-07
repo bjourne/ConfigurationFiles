@@ -1,3 +1,5 @@
+;; Copyright (C) 2025 Björn A. Lindqvist <bjourne@gmail.com>
+;;
 ;; The idea is to replace the contents of .emacs with
 ;;
 ;;	(load-file "~/pubwork/ConfigurationFiles/dot-emacs")
@@ -483,8 +485,6 @@ point reaches the beginning or end of the buffer, stop there."
   (add-to-list 'major-mode-remap-alist
                '(c-or-c++-mode . c-or-c++-ts-mode))))
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Stupid retarted emacs defaults. Why so angry?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -760,7 +760,6 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Persistent scratch
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defun save-persistent-scratch ()
   (with-current-buffer (get-buffer "*scratch*")
     (write-region (point-min) (point-max)
@@ -839,38 +838,57 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Helper functions to make it easier to select the right
+;; customization for a particular computer.
+(defun read-proc-cpuinfo ()
+  (with-temp-buffer
+  (insert-file-contents "/proc/cpuinfo")
+  (when (re-search-forward "^model name[\t\s]*: \\(.*\\)$" nil t)
+    (match-string 1))))
+
+(defun device-identity ()
+  (cond
+   ((file-readable-p "/proc/cpuinfo")
+    (read-proc-cpuinfo))
+   ;; Fallback to host name if /proc/cpuinfo can't be read.
+   (t (system-name))))
+
+;; Inconsolata with italic and bold variants:
+;;    https://github.com/MihailJP/Inconsolata-LGC
+;; Comic Mono:
+;;    https://github.com/dtinth/comic-mono-font
+;; Monaco:
+;;    https://github.com/mps/fonts/blob/master/MONACO.TTF
+(setq-local device-configs
+            '(
+              ("Intel(R) Core(TM) Ultra 9 185H" .
+               ("Inconsolata LGC 12"
+                "~/"
+                ["p/ConfigurationFiles/dot-emacs"
+                 "p/ConfigurationFiles/zshrc"]))
+              ("unknown" .
+               ("Inconsolata LGC 15" "~/" []))
+              )
+            )
+(setq-local device-config
+            (cdr (assoc (device-identity) device-configs)))
+(setq-local device-font (nth 0 device-config))
+(setq-local device-auto-open-root (nth 1 device-config))
+(setq-local device-auto-open-files (nth 2 device-config))
+
 ;; Theme, possibly a different init should be used on windows.
-;;(require 'solarized-theme)
 (global-font-lock-mode t)
 
 ;; Stop unnecessary warnings
 (setq custom-safe-themes t)
 
 (defun gui-theme ()
-  ;; Inconsolata with italic and bold variants:
-  ;;    https://github.com/MihailJP/Inconsolata-LGC
-  ;; Comic Mono:
-  ;;    https://github.com/dtinth/comic-mono-font
-  ;; Monaco:
-  ;;    https://github.com/mps/fonts/blob/master/MONACO.TTF
-  (let ((preferred-fonts
-         '(
-           ;;("bjourne-laptop" . "Inconsolata LGC 12")
-           ;;("bjourne-laptop" . "Monaco 18")
-           ;;("bjourne" . "Comic Mono 12")
-           ;;("bjourne" . "Inconsolata LGC 12")
-           ;;("bjourne" . "Noto Sans Mono 22")
-           ("bjourne" . "Monaco 23")
-           ("windows" . "Consolas-11")
-           ("mydesktop" . "Peep 14")
-           )))
-    (set-face-attribute 'default nil
-                        :font (cdr (assoc (system-name) preferred-fonts))))
-  ;;(set-face-foreground 'font-lock-constant-face "#d33682")
-  ;;(set-face-foreground 'font-lock-variable-name-face "#6c71c4")
-  ;;(load-theme 'solarized-light-high-contrast)
-  ;;(set-face-attribute 'default nil :font "Monaco 23")
-  (setq-default line-spacing 6)
+  (set-face-attribute 'default nil
+                      :font device-font)
+  (when (string= (device-identity) "Intel(R) Core(TM) Ultra 9 185H")
+    (progn (load-theme 'solarized-dark)
+           (setq-default line-spacing 8)))
   )
 
 (defun console-theme ()
@@ -897,30 +915,11 @@ by using nxml's indentation rules."
 (toggle-frame-fullscreen)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Files to open
+;; Open some files automatically
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun auto-open-paths ()
-  (cond
-   ((string-equal (system-name) "bjourne")
-    '("~/"
-      ["/p/ConfigurationFiles/dot-emacs"
-       "/p/ConfigurationFiles/zshrc"
-       ]))
-   ((string-equal (system-name) "bjourne-laptop")
-    '("~/"
-      ["/p/ConfigurationFiles/dot-emacs" "/p/ConfigurationFiles/zshrc"]))
-   ((string-match "kth.se\\'" system-name)
-    '("~/"
-      ["/pubwork/ConfigurationFiles/dot-emacs"]))
-   (is-windows
-    '("C:/code"
-      []))
-   (t '("~/"
-        []))))
 (mapcar
  'find-file
- (let ((open-files (auto-open-paths)))
-   (mapcar (lambda (x) (concat (car open-files) x))
-           (car (cdr open-files)))))
+ (mapcar (lambda (x) (concat device-auto-open-root x))
+         device-auto-open-files))
 
 (server-start)
