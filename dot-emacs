@@ -867,6 +867,9 @@ by using nxml's indentation rules."
                 "~/"
                 ["p/ConfigurationFiles/dot-emacs"
                  "p/ConfigurationFiles/zshrc"]))
+              ("Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz" .
+               ("Monaco 23" "~/" ["p/ConfigurationFiles/dot-emacs"
+                                  "p/ConfigurationFiles/zshrc"]))
               ("unknown" .
                ("Inconsolata LGC 15" "~/" []))
               )
@@ -889,6 +892,8 @@ by using nxml's indentation rules."
   (when (string= (device-identity) "Intel(R) Core(TM) Ultra 9 185H")
     (progn (load-theme 'solarized-dark)
            (setq-default line-spacing 8)))
+  (when (string= (device-identity) "Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz")
+    (setq-default line-spacing 4))
   )
 
 (defun console-theme ()
