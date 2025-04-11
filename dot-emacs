@@ -11,14 +11,17 @@
 ;; XDG config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq config-base "~/.config/emacs/")
-(setq user-emacs-directory (concat config-base "lisp/"))
+;; Setting this screws up the native compiler
+;;(setq user-emacs-directory (concat config-base "lisp/"))
 (setq package-user-dir (concat config-base "packages/"))
 
 ;; Must call this
 (require 'package)
-(package-initialize)
+
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
+;;(package-refresh-contents)
+(package-initialize)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup config
@@ -39,7 +42,6 @@
 ;; frame splitting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; I prefer to split side-by-side rather than on top and below.
-;; TODO: code here
 
 (defun split-window-sensibly-prefer-horiz (&optional window)
   (let ((window (or window (selected-window))))
@@ -170,9 +172,8 @@ point reaches the beginning or end of the buffer, stop there."
            (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\")
            (setq exec-path
                  (append exec-path '("C:/Program Files (x86)/Git/bin")))
-           ;;(setenv "HOME" (concat (getenv "HOMEDRIVE") (getenv "HOMEPATH")))
            (setenv "GIT_ASKPASS" "git-gui--askpass"))
-  (progn (add-to-list 'load-path (expand-file-name "~/.config/emacs/"))))
+  (progn (add-to-list 'load-path (expand-file-name "~/.config/emacs/mylisp"))))
 
 (defmacro with-library (symbol &rest body)
   `(condition-case nil
@@ -472,18 +473,21 @@ point reaches the beginning or end of the buffer, stop there."
 
 (when (fboundp 'use-package)
   (use-package c-ts-mode
-  :if (treesit-language-available-p 'c)
-  :custom
-  (c-ts-mode-indent-offset 4)
-  (c-ts-mode-indent-style #'my-c-ts-indent-style)
-  :init
-  ;; Remap the standard C/C++ modes
-  (add-to-list 'major-mode-remap-alist
-               '(c-mode . c-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(c++-mode . c++-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(c-or-c++-mode . c-or-c++-ts-mode))))
+    :if (treesit-language-available-p 'c)
+    :custom
+    (c-ts-mode-indent-offset 4)
+    (c-ts-mode-indent-style #'my-c-ts-indent-style)
+    :init
+    (add-hook 'c-ts-mode-hook
+              (lambda ()
+                (c-ts-mode-toggle-comment-style -1)))
+    ;; Remap the standard C/C++ modes
+    (add-to-list 'major-mode-remap-alist
+                 '(c-mode . c-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(c++-mode . c++-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(c-or-c++-mode . c-or-c++-ts-mode))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Stupid retarted emacs defaults. Why so angry?
@@ -868,8 +872,11 @@ by using nxml's indentation rules."
                 ["p/ConfigurationFiles/dot-emacs"
                  "p/ConfigurationFiles/zshrc"]))
               ("Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz" .
-               ("Monaco 23" "~/" ["p/ConfigurationFiles/dot-emacs"
-                                  "p/ConfigurationFiles/zshrc"]))
+               ("Monaco 23" "~/"
+                ["p/ConfigurationFiles/dot-emacs"
+                 "p/ConfigurationFiles/zshrc"
+                 "p/c-examples/programs/opencl/matmul_fpga.cl"
+                 ]))
               ("unknown" .
                ("Inconsolata LGC 15" "~/" []))
               )
