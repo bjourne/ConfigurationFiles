@@ -24,6 +24,19 @@
 (package-initialize)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Utility macros
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defmacro with-library (symbol &rest body)
+  `(condition-case nil
+       (progn
+	 (require ', symbol)
+	 ,@body)
+     (error
+      (message (format "I guess we don't have %s available." ',symbol))
+      nil)))
+(put 'with-library 'lisp-indent-function 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq inhibit-startup-message t)
@@ -98,30 +111,6 @@
 (setf dired-kill-when-opening-new-dired-buffer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ido!
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
-(ido-mode t)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; org-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq org-src-fontify-natively t
-      org-export-htmlize-output-type 'css)
-(setq org-log-done t)
-(setq-default org-display-custom-times t)
-(setq org-time-stamp-custom-formats '("<%Y-%m-%d>" . "<%Y-%m-%d %H:%M>"))
-
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; geiser
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when is-windows
-  (setq geiser-racket-binary "C:/Program Files (x86)/Racket/Racket.exe"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved fill-paragraph
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun toggle-fill-paragraph ()
@@ -175,19 +164,43 @@ point reaches the beginning or end of the buffer, stop there."
            (setenv "GIT_ASKPASS" "git-gui--askpass"))
   (progn (add-to-list 'load-path (expand-file-name "~/.config/emacs/mylisp"))))
 
-(defmacro with-library (symbol &rest body)
-  `(condition-case nil
-       (progn
-	 (require ', symbol)
-	 ,@body)
-     (error
-      (message (format "I guess we don't have %s available." ',symbol))
-      nil)))
-(put 'with-library 'lisp-indent-function 1)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package management
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ido!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
+(ido-mode t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; org-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq org-src-fontify-natively t
+      org-export-htmlize-output-type 'css)
+(setq org-log-done t)
+(setq-default org-display-custom-times t)
+(setq org-time-stamp-custom-formats '("<%Y-%m-%d>" . "<%Y-%m-%d %H:%M>"))
+
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CSS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(with-library css-mode
+  (setq cssm-mirror-mode nil)
+  (setq cssm-indent-function #'cssm-c-style-indenter)
+  (setq cssm-indent-level 4)
+  (add-to-list 'auto-mode-alist '("\\.css\\'" . css-mode)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Powershell
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(with-library powershell-mode
+  (add-to-list 'auto-mode-alist '("\\.ps1\\'" . powershell-mode))
+  (add-to-list 'auto-mode-alist '("\\.psm1\\'" . powershell-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NXML
@@ -214,32 +227,6 @@ point reaches the beginning or end of the buffer, stop there."
               'nxml-attribute-value-delimiter-face "RosyBrown")
              (set-face-foreground
               'nxml-attribute-value-face "RosyBrown")))
-
-
-(defun config-auto-modes ()
-  "Setup lots of modes based on extensions."
-  (add-to-list 'auto-mode-alist '("samba\\.conf\\'" . samba-generic-mode))
-  (add-to-list 'auto-mode-alist '("smb\\.conf" . samba-generic-mode))
-
-  (add-to-list 'auto-mode-alist '("70-install-asterisk" . cfengine-mode))
-  (add-to-list 'auto-mode-alist '("access\\.conf\\'" . apache-mode))
-  (add-to-list 'auto-mode-alist '("apache2\\.conf\\'" . apache-mode))
-  (add-to-list 'auto-mode-alist '("httpd\\.conf\\'" . apache-mode))
-  (add-to-list 'auto-mode-alist
-               '("sites-\\(available\\|enabled\\)/" . apache-mode))
-  (add-to-list 'auto-mode-alist '("srm\\.conf\\'"    . apache-mode))
-  (add-to-list 'auto-mode-alist '(".htaccess"   . apache-mode))
-
-  (add-to-list 'auto-mode-alist '("\\.css\\'" . css-mode))
-
-  (add-to-list 'auto-mode-alist '("extensions\\.conf\\'" . conf-windows-mode))
-  )
-
-(defun config-css-mode ()
-  (with-library css-mode
-    (setq cssm-mirror-mode nil)
-    (setq cssm-indent-function #'cssm-c-style-indenter)
-    (setq cssm-indent-level 4)))
 
 (defun config-global-keybindings ()
   ;; Set some keyboard shortcuts
@@ -269,27 +256,9 @@ point reaches the beginning or end of the buffer, stop there."
   ;; Ibuffer
   (global-set-key (kbd "C-x C-b") 'ibuffer))
 
-(defun config-auto-insert-mode ()
-  (require 'autoinsert)
-  (auto-insert-mode)
-  (setq auto-insert-directory "~/.site-lisp/templates/")
-  (setq auto-insert-query nil)
-  (define-auto-insert "\.py" "python-template.py"))
-
 (defun config-session ()
   (with-library session
     (add-hook 'after-init-hook 'session-initialize)))
-
-(defun config-powershell-mode()
-  (with-library powershell-mode
-    (add-to-list 'auto-mode-alist '("\\.ps1\\'" . powershell-mode))
-    (add-to-list 'auto-mode-alist '("\\.psm1\\'" . powershell-mode))))
-
-(config-auto-insert-mode)
-
-;; This library is new in emacs 22 I think and gives me lots of
-;; goodies. etc-fstab-generic-mode for example!
-(load-library "generic-x")
 
 ;; Mouse wheel
 (mouse-wheel-mode t)
@@ -311,19 +280,10 @@ point reaches the beginning or end of the buffer, stop there."
 ;; Make it so yanked text is placed in xorg's clipboard buffer.
 (setq x-select-enable-clipboard t)
 
-(config-auto-modes)
-
-;; Make it so tab indents in sgml-mode
-(require 'sgml-mode)
-(define-key sgml-mode-map "\t" 'tab-to-tab-stop)
-
 ;; emacs-lisp-mode
 (define-key emacs-lisp-mode-map "\C-t" 'lisp-complete-symbol)
 
 (with-library apache-mode)
-
-(config-css-mode)
-(config-powershell-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; verilog-mode
@@ -490,7 +450,7 @@ point reaches the beginning or end of the buffer, stop there."
                  '(c-or-c++-mode . c-or-c++-ts-mode))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Auto saving backups. Stupid retarted emacs defaults. Why so angry?
+;; Auto saving backups. Fixed emacs bad defaults.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar saves-dir (expand-file-name "~/.local/state/emacs/"))
 
@@ -525,9 +485,6 @@ point reaches the beginning or end of the buffer, stop there."
     (delete-region first-point next-point))
   )
 
-(defun config-jinja2-mode ()
-  (with-library jinja2-mode ()))
-
 ;; End files with newlines
 (setq require-final-newline t)
 (setq next-line-add-newlines nil)
@@ -538,8 +495,6 @@ point reaches the beginning or end of the buffer, stop there."
 (setq-default save-place t)
 
 (config-session)
-
-(config-jinja2-mode)
 
 ;; Better uniquify
 (require 'uniquify)
@@ -583,40 +538,11 @@ by using nxml's indentation rules."
 ;; Improves performance on Windows
 (setq w32-get-true-file-attributes nil)
 
-
-;; Jade, Sws and Stylus modes
-(with-library sws-mode)
-(with-library jade-mode
-  (add-to-list 'auto-mode-alist '("\\.jade$" . jade-mode)))
-(with-library stylus-mode
-  (add-to-list 'auto-mode-alist '("\\.styl$" . stylus-mode)))
-
 (setq read-buffer-completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
 
 
 (put 'downcase-region 'disabled nil)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ace-jump-mode, provisional. Not sure I like it yet
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(autoload
-  'ace-jump-mode
-  "ace-jump-mode"
-  "Emacs quick move minor mode"
-  t)
-(define-key global-map (kbd "C-c ö") 'ace-jump-mode)
-
-(autoload
-  'ace-jump-mode-pop-mark
-  "ace-jump-mode"
-  "Ace jump back:-)"
-  t)
-(eval-after-load "ace-jump-mode"
-  '(ace-jump-mode-enable-mark-sync))
-
-(define-key global-map (kbd "C-c å") 'ace-jump-mode-pop-mark)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Strip trailing whitespace on save
@@ -700,11 +626,6 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
 (setq prolog-indent-width 4)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CoffeeScript
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(with-library coffee-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Haskell
@@ -934,4 +855,7 @@ by using nxml's indentation rules."
  (mapcar (lambda (x) (concat device-auto-open-root x))
          device-auto-open-files))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Run the server
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (server-start)
