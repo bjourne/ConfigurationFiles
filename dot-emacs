@@ -3,12 +3,9 @@
 ;; The idea is to replace the contents of .emacs with
 ;;
 ;;	(load-file "~/pubwork/ConfigurationFiles/dot-emacs")
-;;
-(require 'cl)
-(setq is-windows (string-equal system-type "windows-nt"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; XDG config
+;; XDG & package initialization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq config-base "~/.config/emacs/")
 ;; Setting this screws up the native compiler
@@ -156,6 +153,8 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq is-windows (string-equal system-type "windows-nt"))
+
 (if is-windows
     (progn (setq default-directory "C:\\")
            (add-to-list 'load-path "C:\\.emacs.d\\my-packages\\")
@@ -165,7 +164,40 @@ point reaches the beginning or end of the buffer, stop there."
   (progn (add-to-list 'load-path (expand-file-name "~/.config/emacs/mylisp"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Personal details
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Setup personal info. This is to make ChangeLog mode work
+(setq user-mail-address "bjourne@gmail.com")
+(setq user-full-name "Björn Lindqvist")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Persistent scratch
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun save-persistent-scratch ()
+  (with-current-buffer (get-buffer "*scratch*")
+    (write-region (point-min) (point-max)
+                  (concat config-base "scratch"))))
+
+(defun load-persistent-scratch ()
+  (if (file-exists-p (concat config-base "scratch"))
+      (with-current-buffer (get-buffer "*scratch*")
+        (delete-region (point-min) (point-max))
+        (insert-file (concat config-base "scratch")))))
+
+(load-persistent-scratch)
+(push #'save-persistent-scratch kill-emacs-hook)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Strip trailing whitespace on save
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; Package management
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -227,34 +259,6 @@ point reaches the beginning or end of the buffer, stop there."
               'nxml-attribute-value-delimiter-face "RosyBrown")
              (set-face-foreground
               'nxml-attribute-value-face "RosyBrown")))
-
-(defun config-global-keybindings ()
-  ;; Set some keyboard shortcuts
-  (global-set-key "\M-g" 'goto-line)
-  (global-set-key [f9] 'compile)
-  (global-set-key (kbd "M-<return>") 'complete-tag)
-
-  ;; Dabbrev stuff
-  (global-set-key (kbd "M-SPC") 'hippie-expand)
-
-  ;; comment-dwim on C-c c
-  (global-set-key (kbd "C-c c") 'comment-dwim)
-  ;; Move fast between buffers. These pretty useful commands aren't
-  ;; bound to anything by default.
-  (global-set-key (kbd "s-n") 'next-buffer)
-  (global-set-key (kbd "s-p") 'previous-buffer)
-
-  ;; Basic stuff
-  (global-set-key "\C-z" 'undo)
-  (global-set-key "\C-?" 'backward-delete-char-untabify)
-  (global-set-key [delete] 'delete-horizontal-space-forward)
-  (global-set-key (kbd "C-c m") 'rename-file-and-buffer)
-
-  ;; Move between windows
-  (windmove-default-keybindings)
-
-  ;; Ibuffer
-  (global-set-key (kbd "C-x C-b") 'ibuffer))
 
 (defun config-session ()
   (with-library session
@@ -529,12 +533,6 @@ by using nxml's indentation rules."
     (indent-region begin end))
   (message "Ah, much better!"))
 
-;; Graphviz-mode
-(with-library graphviz-dot-mode)
-
-;; Keybindings
-(config-global-keybindings)
-
 ;; Improves performance on Windows
 (setq w32-get-true-file-attributes nil)
 
@@ -545,16 +543,30 @@ by using nxml's indentation rules."
 (put 'downcase-region 'disabled nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Strip trailing whitespace on save
+;; Global keybindings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(global-set-key "\M-g" 'goto-line)
+(global-set-key [f9] 'compile)
+(global-set-key (kbd "M-<return>") 'complete-tag)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Personal details
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Setup personal info. This is to make ChangeLog mode work
-(setq user-mail-address "bjourne@gmail.com")
-(setq user-full-name "Björn Lindqvist")
+;; Dabbrev stuff
+(global-set-key (kbd "M-SPC") 'hippie-expand)
+
+;; comment-dwim on C-c c
+(global-set-key (kbd "C-c c") 'comment-dwim)
+
+;; Basic stuff
+(global-set-key "\C-z" 'undo)
+(global-set-key "\C-?" 'backward-delete-char-untabify)
+(global-set-key [delete] 'delete-horizontal-space-forward)
+(global-set-key (kbd "C-c m") 'rename-file-and-buffer)
+
+;; Move between windows
+(windmove-default-keybindings)
+
+;; Ibuffer
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Magit
@@ -681,23 +693,6 @@ by using nxml's indentation rules."
   (vc-git-grep (grep-read-regexp) "*" (vc-git-root default-directory))
   (other-window 1))
 (global-set-key (kbd "C-c g") 'my-vc-git-grep)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Persistent scratch
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun save-persistent-scratch ()
-  (with-current-buffer (get-buffer "*scratch*")
-    (write-region (point-min) (point-max)
-                  (concat config-base "scratch"))))
-
-(defun load-persistent-scratch ()
-  (if (file-exists-p (concat config-base "scratch"))
-      (with-current-buffer (get-buffer "*scratch*")
-        (delete-region (point-min) (point-max))
-        (insert-file (concat config-base "scratch")))))
-
-(load-persistent-scratch)
-(push #'save-persistent-scratch kill-emacs-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
