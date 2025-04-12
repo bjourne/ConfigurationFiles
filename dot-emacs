@@ -214,8 +214,6 @@ point reaches the beginning or end of the buffer, stop there."
   :config
   (lsp-enable-which-key-integration t))
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -234,6 +232,9 @@ point reaches the beginning or end of the buffer, stop there."
   :bind (:map css-mode-map
               ("C-c C-c" . css-cycle-color-format)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Misc stuff
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mouse wheel
 (mouse-wheel-mode t)
 
@@ -253,9 +254,6 @@ point reaches the beginning or end of the buffer, stop there."
 
 ;; Make it so yanked text is placed in xorg's clipboard buffer.
 (setq x-select-enable-clipboard t)
-
-;; emacs-lisp-mode
-(define-key emacs-lisp-mode-map "\C-t" 'lisp-complete-symbol)
 
 (with-library apache-mode)
 
@@ -559,7 +557,9 @@ by using nxml's indentation rules."
 ;; Elisp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package emacs-lisp-mode
-  :mode ("dot-emacs$"))
+  :mode ("dot-emacs$")
+  :bind (:map emacs-lisp-mode-map
+              ("C-t" . completion-at-point)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -569,26 +569,21 @@ by using nxml's indentation rules."
   (interactive "P")
   (run-python cmd dedicated show)
   (switch-to-buffer-other-window "*Python*"))
-(require 'python)
-(define-key python-mode-map "\C-c\C-p" 'my-run-python)
-(setq python-shell-interpreter "python")
-
-(defun nagy-python-style()
-  "This mode is used for waf code."
-  (interactive)
-  (setq python-indent 4)
-  (setq tab-width 4)
-  (setq indent-tabs-mode t))
+;; (require 'python)
+;; (define-key python-mode-map "\C-c\C-p" 'my-run-python)
+;; (setq python-shell-interpreter "python")
 
 ;; Many auto mode alists
-(add-to-list 'auto-mode-alist
-             '("SConstruct\\|SConscript\\|wscript\\|wscript_build"
-               . python-mode))
+(use-package python-mode
+  :mode ("SConstruct\\|SConscript\\|wscript\\|wscript_build")
+  :bind (:map python-mode-map
+              ("C-c C-p" . my-run-python)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; YAML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+(use-package yaml-mode
+  :mode ("\\.yml\\'"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Javascript
@@ -611,11 +606,8 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Markdown
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'markdown-mode)
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-(setq markdown-italic-underscore nil)
-(custom-set-faces
- '(markdown-code-face ((t (:inherit nil)))))
+(use-package markdown-mode
+  :mode ("\\.md\\'"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
