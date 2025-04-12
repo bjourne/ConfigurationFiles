@@ -7,9 +7,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; XDG & package initialization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (setq config-base "~/.config/emacs/")
-;; Setting this screws up the native compiler
-;;(setq user-emacs-directory (concat config-base "lisp/"))
 (setq package-user-dir (concat config-base "packages/"))
 
 ;; Must call this
@@ -193,12 +192,29 @@ point reaches the beginning or end of the buffer, stop there."
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Which key is nice
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(which-key-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Package management
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; LSP
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
@@ -208,61 +224,15 @@ point reaches the beginning or end of the buffer, stop there."
 (ido-mode t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; org-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq org-src-fontify-natively t
-      org-export-htmlize-output-type 'css)
-(setq org-log-done t)
-(setq-default org-display-custom-times t)
-(setq org-time-stamp-custom-formats '("<%Y-%m-%d>" . "<%Y-%m-%d %H:%M>"))
-
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CSS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(with-library css-mode
-  (setq cssm-mirror-mode nil)
-  (setq cssm-indent-function #'cssm-c-style-indenter)
-  (setq cssm-indent-level 4)
-  (add-to-list 'auto-mode-alist '("\\.css\\'" . css-mode)))
+(use-package rainbow-mode :ensure t)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Powershell
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(with-library powershell-mode
-  (add-to-list 'auto-mode-alist '("\\.ps1\\'" . powershell-mode))
-  (add-to-list 'auto-mode-alist '("\\.psm1\\'" . powershell-mode)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; NXML
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist
-             (cons (concat "\\." (regexp-opt '("xml" "xsd") t) "\\'")
-                   'nxml-mode))
-(setq magic-mode-alist
-      (cons '("<\\?xml " . nxml-mode)
-            magic-mode-alist))
-(fset 'xml-mode 'nxml-mode)
-(fset 'html-mode 'nxml-mode)
-
-;; Customizing
-(add-hook 'nxml-mode-hook
-          '(lambda()
-             (set-face-foreground
-              'nxml-attribute-local-name-face "#bb6600")
-             (set-face-foreground
-              'nxml-processing-instruction-delimiter-face "purple")
-             (set-face-foreground
-              'nxml-processing-instruction-target-face "purple")
-             (set-face-foreground
-              'nxml-attribute-value-delimiter-face "RosyBrown")
-             (set-face-foreground
-              'nxml-attribute-value-face "RosyBrown")))
-
-(defun config-session ()
-  (with-library session
-    (add-hook 'after-init-hook 'session-initialize)))
+(use-package css-mode
+  :init
+  (setq css-indent-offset 4)
+  :bind (:map css-mode-map
+              ("C-c C-c" . css-cycle-color-format)))
 
 ;; Mouse wheel
 (mouse-wheel-mode t)
@@ -307,7 +277,12 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Typescript
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(use-package typescript-mode
+  :mode "\\.ts\\'"
+  :hook (typescript-mode . lsp-deferred)
+  :config
+  (setq typescript-indent-level 4))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; C-mode, Java, etc.
@@ -498,8 +473,6 @@ point reaches the beginning or end of the buffer, stop there."
 (require 'saveplace)
 (setq-default save-place t)
 
-(config-session)
-
 ;; Better uniquify
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
@@ -546,8 +519,6 @@ by using nxml's indentation rules."
 ;; Global keybindings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (global-set-key "\M-g" 'goto-line)
-(global-set-key [f9] 'compile)
-(global-set-key (kbd "M-<return>") 'complete-tag)
 
 ;; Dabbrev stuff
 (global-set-key (kbd "M-SPC") 'hippie-expand)
@@ -579,14 +550,16 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.conf$" . sh-mode))
-(add-to-list 'auto-mode-alist '("\\.zsh$" . sh-mode))
-(add-to-list 'auto-mode-alist '("\\(/\\|\\`\\)zshrc$" . sh-mode))
+(use-package sh-mode
+  :mode ("\\.conf$"
+         "\\.zsh$"
+         "\\(/\\|\\`\\)zshrc$"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Elisp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("dot-emacs$" . emacs-lisp-mode))
+(use-package emacs-lisp-mode
+  :mode ("dot-emacs$"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -616,15 +589,6 @@ by using nxml's indentation rules."
 ;; YAML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; HTML mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.kid\\'" . html-mode))
-(add-to-list 'auto-mode-alist '("\\.tmpl\\'" . html-mode))
-
-;; Setup html-mode
-(define-key html-mode-map "\t" 'indent-according-to-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Javascript
@@ -791,7 +755,7 @@ by using nxml's indentation rules."
                ("Monaco 23" "~/"
                 ["p/ConfigurationFiles/dot-emacs"
                  "p/ConfigurationFiles/zshrc"
-                 "p/c-examples/programs/opencl/matmul_fpga.cl"
+                 "c/html/test.css"
                  ]))
               ("unknown" .
                ("Inconsolata LGC 15" "~/" []))
