@@ -265,17 +265,19 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; verilog-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'verilog-mode)
-(setq verilog-auto-endcomments nil)
-(setq verilog-auto-lineup nil)
-(setq verilog-cexp-indent 4)
-(setq verilog-indent-begin-after-if nil)
-(setq verilog-indent-level 4)
-(setq verilog-indent-level-declaration 4)
-(setq verilog-indent-level-module 4)
-(setq verilog-indent-lists nil)
-(define-key verilog-mode-map [delete] nil)
-(define-key verilog-mode-map [backspace] nil)
+(use-package verilog-mode
+  :bind (:map verilog-mode-map
+              ([delete] . nil)
+              ([backspace] . nil))
+  :init
+  (setq verilog-auto-endcomments nil)
+  (setq verilog-auto-lineup nil)
+  (setq verilog-cexp-indent 4)
+  (setq verilog-indent-begin-after-if nil)
+  (setq verilog-indent-level 4)
+  (setq verilog-indent-level-declaration 4)
+  (setq verilog-indent-level-module 4)
+  (setq verilog-indent-lists nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Typescript
@@ -285,7 +287,6 @@ point reaches the beginning or end of the buffer, stop there."
   :hook (typescript-mode . lsp-deferred)
   :config
   (setq typescript-indent-level 4))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; C-mode, Java, etc.
@@ -411,23 +412,22 @@ point reaches the beginning or end of the buffer, stop there."
     )
   )
 
-(when (fboundp 'use-package)
-  (use-package c-ts-mode
-    :if (treesit-language-available-p 'c)
-    :custom
-    (c-ts-mode-indent-offset 4)
-    (c-ts-mode-indent-style #'my-c-ts-indent-style)
-    :init
-    (add-hook 'c-ts-mode-hook
-              (lambda ()
-                (c-ts-mode-toggle-comment-style -1)))
-    ;; Remap the standard C/C++ modes
-    (add-to-list 'major-mode-remap-alist
-                 '(c-mode . c-ts-mode))
-    (add-to-list 'major-mode-remap-alist
-                 '(c++-mode . c++-ts-mode))
-    (add-to-list 'major-mode-remap-alist
-                 '(c-or-c++-mode . c-or-c++-ts-mode))))
+(use-package c-ts-mode
+  :if (treesit-language-available-p 'c)
+  :custom
+  (c-ts-mode-indent-offset 4)
+  (c-ts-mode-indent-style #'my-c-ts-indent-style)
+  :init
+  (add-hook 'c-ts-mode-hook
+            (lambda ()
+              (c-ts-mode-toggle-comment-style -1)))
+  ;; Remap the standard C/C++ modes
+  (add-to-list 'major-mode-remap-alist
+               '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(c++-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(c-or-c++-mode . c-or-c++-ts-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Fixed emacs bad defaults.
