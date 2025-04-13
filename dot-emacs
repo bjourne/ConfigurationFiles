@@ -20,19 +20,6 @@
 (package-initialize)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Utility macros
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defmacro with-library (symbol &rest body)
-  `(condition-case nil
-       (progn
-	 (require ', symbol)
-	 ,@body)
-     (error
-      (message (format "I guess we don't have %s available." ',symbol))
-      nil)))
-(put 'with-library 'lisp-indent-function 1)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq inhibit-startup-message t)
@@ -98,13 +85,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dired customization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'dired-x)
-(add-hook 'dired-load-hook
-          (function (lambda () (load "dired-x"))))
+(use-package dired-x)
 
-;; This shouldn't work on Windows
-(setq dired-listing-switches "-al --group-directories-first")
-(setf dired-kill-when-opening-new-dired-buffer t)
+(use-package dired
+  :init
+  (setq dired-kill-when-opening-new-dired-buffer t)
+  (setq dired-listing-switches "-agloA --group-directories-first")
+  :bind (:map dired-mode-map
+              ("h" . dired-up-directory)
+              ("l" . dired-find-file))
+  :hook ((dired-mode . (lambda() (load "dired-x")))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved fill-paragraph
@@ -205,9 +196,25 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; LSP
+;; LSP, Flymake, and Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package company
+  :bind (:map company-mode-map
+              ("M-SPC" . 'company-complete))
+  :ensure t
+  :init
+  ;; Don't autoshow the completion popup
+  (setq company-minimum-prefix-length 1)
+  (setq company-idle-delay nil))
+
+(use-package flymake
+  :bind (:map flymake-mode-map
+              ("M-p" . flymake-goto-prev-error)
+              ("M-n" . flymake-goto-next-error)))
+
 (use-package lsp-mode
+  :after company
+  :ensure t
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")
@@ -254,8 +261,6 @@ point reaches the beginning or end of the buffer, stop there."
 
 ;; Make it so yanked text is placed in xorg's clipboard buffer.
 (setq x-select-enable-clipboard t)
-
-(with-library apache-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; verilog-mode
@@ -309,8 +314,6 @@ point reaches the beginning or end of the buffer, stop there."
   (c-set-offset 'innamespace [0])
   (c-set-offset 'arglist-close 0)
   (c-set-offset 'cpp-macro 0)
-  ;;(c-set-offset 'bracelist-open 0)
-  ;;(c-set-style "my-cc-style")
   (define-key c-mode-base-map (kbd "C-c C-d") nil)
   (define-key c-mode-base-map (kbd "C-c C-d C-d") 'man-follow))
 (add-hook 'c-mode-common-hook 'my-c-initialization-hook)
@@ -551,6 +554,7 @@ by using nxml's indentation rules."
 (use-package sh-mode
   :mode ("\\.conf$"
          "\\.zsh$"
+         "\\(/\\|\\`\\)bashrc$"
          "\\(/\\|\\`\\)zshrc$"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -569,9 +573,6 @@ by using nxml's indentation rules."
   (interactive "P")
   (run-python cmd dedicated show)
   (switch-to-buffer-other-window "*Python*"))
-;; (require 'python)
-;; (define-key python-mode-map "\C-c\C-p" 'my-run-python)
-;; (setq python-shell-interpreter "python")
 
 ;; Many auto mode alists
 (use-package python-mode
@@ -584,13 +585,6 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package yaml-mode
   :mode ("\\.yml\\'"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Javascript
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(autoload 'javascript-mode "javascript" nil t)
-(add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
-(add-to-list 'auto-mode-alist '("\\.json\\'" . javascript-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Prolog
@@ -643,12 +637,13 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Had to hack vc-git.el to add --color=always to the git grep command.
 (require 'grep)
-(require 'vc)
 (defun my-vc-git-grep ()
   (interactive)
   (vc-git-grep (grep-read-regexp) "*" (vc-git-root default-directory))
   (other-window 1))
-(global-set-key (kbd "C-c g") 'my-vc-git-grep)
+
+(use-package vc
+  :bind ("C-c g" . my-vc-git-grep))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
@@ -710,6 +705,11 @@ by using nxml's indentation rules."
             (set-language "en" "English")
             (local-set-key (kbd "C-c l") 'my-ispell-change-dictionaries)
             (local-set-key (kbd "C-c a") 'flyspell-correct-word-before-point)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Solarized theme
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package solarized-theme)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Theme, fonts and faces.
