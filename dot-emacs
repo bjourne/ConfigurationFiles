@@ -196,30 +196,39 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; LSP, Flymake, and Company
+;; LSP, Flycheck, and Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package company
-  :bind (:map company-mode-map
-              ("M-SPC" . 'company-complete))
-  :ensure t
-  :init
-  ;; Don't autoshow the completion popup
-  (setq company-minimum-prefix-length 1)
-  (setq company-idle-delay nil))
-
 (use-package flymake
   :bind (:map flymake-mode-map
               ("M-p" . flymake-goto-prev-error)
               ("M-n" . flymake-goto-next-error)))
 
 (use-package lsp-mode
-  :after company
   :ensure t
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")
   :config
   (lsp-enable-which-key-integration t))
+
+(use-package company
+  :ensure t
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-mode-map
+              ("M-SPC" . 'company-complete))
+  :init
+  ;; Don't autoshow the completion popup
+  (setq company-minimum-prefix-length 1)
+  (setq company-idle-delay nil))
+
+(use-package flycheck
+  :ensure t
+  :after lsp-mode
+  :bind (:map flycheck-mode-map
+              ("M-p" . flycheck-previous-error)
+              ("M-n" . flycheck-next-error)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
@@ -589,13 +598,10 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Prolog
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
-(setq prolog-indent-width 4)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Haskell
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+(use-package prolog-mode
+  :mode "\\.pl\\'"
+  :init
+  (setq prolog-indent-width 4))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Markdown
