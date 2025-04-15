@@ -578,6 +578,13 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Python
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun tidy()
+  (interactive)
+  (shell-command-on-region
+   (region-beginning)
+   (region-end)
+   "black -l 78 -" nil t "*Black*" nil))
+
 (defun my-run-python (cmd &optional dedicated show)
   (interactive "P")
   (run-python cmd dedicated show)
