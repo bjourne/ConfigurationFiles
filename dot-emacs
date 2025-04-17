@@ -112,33 +112,48 @@
 (global-set-key "\M-q" 'toggle-fill-paragraph)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Improved move to beginning of line
+;; Improved navigation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun smarter-move-beginning-of-line (arg)
-  "Move point back to indentation of beginning of line.
+(defun smarter-move-beginning ()
+  (interactive)
+  (let* ((at (point))
+         (bol (line-beginning-position))
+         (indent (save-excursion
+                  (back-to-indentation)
+                  (point))))
+    (cond
+     ((= at bol)
+      (if (bobp)
+          (progn
+            (beep)
+            (message "Beginning of buffer"))
+        (forward-line -1)
+        (end-of-line)))
+     ((<= at indent)
+      (move-to-column 0))
+     (t (back-to-indentation)))))
 
-Move point to the first non-whitespace character on this line.
-If point is already there, move to the beginning of the line.
-Effectively toggle between the first non-whitespace character and
-the beginning of the line.
+(defun smarter-move-end ()
+  (interactive)
+  (let* ((at (point))
+         (eol (line-end-position))
+         (indent (save-excursion
+                  (back-to-indentation)
+                  (point))))
+    (cond
+     ((= at eol)
+      (if (eobp)
+          (progn
+            (beep)
+            (message "End of buffer"))
+        (forward-line 1)
+        (beginning-of-line)))
+     ((< at indent)
+      (back-to-indentation))
+     (t (end-of-line)))))
 
-If ARG is not nil or 1, move forward ARG - 1 lines first.  If
-point reaches the beginning or end of the buffer, stop there."
-  (interactive "^p")
-  (setq arg (or arg 1))
-
-  ;; Move lines first
-  (when (/= arg 1)
-    (let ((line-move-visual nil))
-      (forward-line (1- arg))))
-
-  (let ((orig-point (point)))
-    (back-to-indentation)
-    (when (= orig-point (point))
-      (move-beginning-of-line 1))))
-
-(global-set-key [remap move-beginning-of-line]
-                'smarter-move-beginning-of-line)
+(global-set-key [remap move-beginning-of-line] 'smarter-move-beginning)
+(global-set-key [remap move-end-of-line] 'smarter-move-end)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
@@ -198,11 +213,6 @@ point reaches the beginning or end of the buffer, stop there."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; LSP, Flycheck, and Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package flymake
-  :bind (:map flymake-mode-map
-              ("M-p" . flymake-goto-prev-error)
-              ("M-n" . flymake-goto-next-error)))
-
 (use-package lsp-mode
   :ensure t
   :commands (lsp lsp-deferred)
@@ -221,6 +231,11 @@ point reaches the beginning or end of the buffer, stop there."
   ;; Don't autoshow the completion popup
   (setq company-minimum-prefix-length 1)
   (setq company-idle-delay nil))
+
+(use-package flymake
+  :bind (:map flymake-mode-map
+              ("M-p" . flymake-goto-prev-error)
+              ("M-n" . flymake-goto-next-error)))
 
 (use-package flycheck
   :ensure t
