@@ -155,6 +155,27 @@
 (global-set-key [remap move-beginning-of-line] 'smarter-move-beginning)
 (global-set-key [remap move-end-of-line] 'smarter-move-end)
 
+(defun smarter-vl-move-end ()
+  (interactive)
+  (let ((eol (save-excursion
+	       (end-of-visual-line 1)
+	       (point))))
+    (if (< (point) eol)
+        (goto-char eol)
+      (goto-char (+ eol 1)))))
+
+(defun smarter-vl-move-beginning ()
+  (interactive)
+  (let ((bol (save-excursion
+	       (beginning-of-visual-line 1)
+	       (point))))
+    (if (> (point) bol)
+	(goto-char bol)
+      (goto-char (- bol 1)))))
+
+(define-key visual-line-mode-map (kbd "C-a") #'smarter-vl-move-beginning)
+(define-key visual-line-mode-map (kbd "C-e") #'smarter-vl-move-end)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OS specific configuration.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
