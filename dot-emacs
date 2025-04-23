@@ -100,16 +100,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved fill-paragraph
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun toggle-fill-paragraph ()
+(defun toggle-filling ()
   (interactive)
-  (let ((pre (thing-at-point 'line))
-        (old-fill fill-column))
-    (fill-paragraph)
-    (when (string= (thing-at-point 'line) pre)
-      (setq-local fill-column 99999)
-      (fill-paragraph)
-      (setq-local fill-column old-fill))))
-(global-set-key "\M-q" 'toggle-fill-paragraph)
+  (let* ((reg-p (use-region-p))
+	 (lo (if reg-p (region-beginning)
+	       (save-excursion (backward-paragraph) (point))))
+	 (hi (if reg-p (region-end)
+	       (save-excursion (forward-paragraph) (point))))
+	 (old (buffer-substring-no-properties lo hi)))
+    (if (use-region-p)
+	(fill-region lo hi)
+      (fill-paragraph))
+    (let* ((new (buffer-substring-no-properties lo hi))
+	   (fill-column 9999))
+      (when (string= new old)
+	(if reg-p
+	    (fill-region lo hi)
+	  (fill-paragraph))))))
+
+(global-set-key "\M-q" 'toggle-filling)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved navigation
@@ -635,6 +644,7 @@ by using nxml's indentation rules."
 
 ;; Many auto mode alists
 (use-package python-mode
+  :ensure nil
   :mode ("SConstruct\\|SConscript\\|wscript\\|wscript_build")
   :bind (:map python-mode-map
               ("C-c C-p" . my-run-python)))
@@ -657,7 +667,11 @@ by using nxml's indentation rules."
 ;; Markdown
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package markdown-mode
-  :mode ("\\.md\\'"))
+  :mode ("\\.md\\'")
+  :bind (:map markdown-mode-map
+	      ("C-e" . #'smarter-move-end)
+	      ("C-a" . #'smarter-move-beginning)))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
