@@ -233,6 +233,19 @@
 (which-key-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Desktop mode and frame configuration
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq
+ desktop-path '("~/.config/emacs/")
+ desktop-base-file-name "desktop")
+(desktop-save-mode 1)
+(desktop-read)
+
+(setq frame-resize-pixelwise t)
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Package management
@@ -530,10 +543,6 @@
 (setq require-final-newline t)
 (setq next-line-add-newlines nil)
 
-;; Makes it so the pointer returns to the position it was in last time
-;; the file was open.
-(require 'saveplace)
-(setq-default save-place t)
 
 ;; Better uniquify
 (require 'uniquify)
@@ -613,10 +622,7 @@ by using nxml's indentation rules."
 ;; Shell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package sh-mode
-  :mode ("\\.conf$"
-         "\\.zsh$"
-         "\\(/\\|\\`\\)bashrc$"
-         "\\(/\\|\\`\\)zshrc$"))
+  :mode ("\\.conf$" "\\.zsh$"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Elisp
@@ -859,22 +865,6 @@ by using nxml's indentation rules."
 (if (display-graphic-p)
    (gui-theme)
   (console-theme))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Frame configuration
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; It's better to use the -mm parameter
-;;(when is-windows (w32-send-sys-command 61488))
-(setq frame-resize-pixelwise t)
-(toggle-frame-fullscreen)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Open some files automatically
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(mapcar
- 'find-file
- (mapcar (lambda (x) (concat device-auto-open-root x))
-         device-auto-open-files))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Run the server
