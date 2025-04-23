@@ -187,7 +187,7 @@
            (setq exec-path
                  (append exec-path '("C:/Program Files (x86)/Git/bin")))
            (setenv "GIT_ASKPASS" "git-gui--askpass"))
-  (progn (add-to-list 'load-path (expand-file-name "~/.config/emacs/mylisp"))))
+  (add-to-list 'load-path (expand-file-name "~/.config/emacs/mylisp")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Personal details
@@ -265,6 +265,13 @@
               ("M-p" . flycheck-previous-error)
               ("M-n" . flycheck-next-error)))
 
+
+(use-package lsp-pyright
+  :ensure t
+  :custom (lsp-pyright-langserver-command "pyright")
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
