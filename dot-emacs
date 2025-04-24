@@ -233,19 +233,6 @@
 (which-key-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Desktop mode and frame configuration
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(setq
- desktop-path '("~/.config/emacs/")
- desktop-base-file-name "desktop")
-(desktop-save-mode 1)
-(desktop-read)
-
-(setq frame-resize-pixelwise t)
-(add-to-list 'default-frame-alist '(fullscreen . fullboth))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Package management
@@ -290,7 +277,9 @@
 
 (use-package lsp-pyright
   :ensure t
-  :custom (lsp-pyright-langserver-command "pyright")
+  :custom
+  (lsp-pyright-langserver-command "basedpyright")
+  (lsp-pyright-type-checking-mode "off")
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))
@@ -298,8 +287,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
+(setq ido-enable-flex-matching t
+      ido-everywhere t)
 (ido-mode t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -367,9 +356,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package cc-mode
   :init
-  (setq tab-width 2)
-  (setq indent-tabs-mode nil)
-  (setq c-basic-offset 4))
+  (setq tab-width 2
+        indent-tabs-mode nil
+        c-basic-offset 4))
 
 (mapcar
  (lambda (x)
@@ -601,7 +590,6 @@ by using nxml's indentation rules."
 (global-set-key "\C-z" 'undo)
 (global-set-key "\C-?" 'backward-delete-char-untabify)
 (global-set-key [delete] 'delete-horizontal-space-forward)
-(global-set-key (kbd "C-c m") 'rename-file-and-buffer)
 
 ;; Move between windows
 (windmove-default-keybindings)
@@ -683,10 +671,11 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; VHDL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'vhdl-mode)
-(setq vhdl-basic-offset 4)
-(vhdl-set-offset 'arglist-close 0)
-
+(use-package vhdl-mode
+  :init
+  (setq vhdl-basic-offset 4)
+  :hook (vhdl-mode . (lambda ()
+                       (vhdl-set-offset 'arglist-close 0))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Octave
@@ -870,3 +859,19 @@ by using nxml's indentation rules."
 ;; Run the server
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (server-start)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Desktop mode and frame configuration
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Not sure, but it might be important that the desktop is loaded
+;; after all packages are configured.
+(setq
+ desktop-path '("~/.config/emacs/")
+ ;; I'd like to override the name of the lock file too, but there is
+ ;; no good interface for that.
+ desktop-base-file-name "desktop")
+(desktop-save-mode 1)
+
+(setq frame-resize-pixelwise t)
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
