@@ -126,12 +126,11 @@
 (defun smarter-move-beginning ()
   (interactive)
   (let* ((at (point))
-         (bol (line-beginning-position))
          (indent (save-excursion
                   (back-to-indentation)
                   (point))))
     (cond
-     ((= at bol)
+     ((bolp)
       (if (bobp)
           (progn
             (beep)
@@ -142,15 +141,15 @@
       (move-to-column 0))
      (t (back-to-indentation)))))
 
+
 (defun smarter-move-end ()
   (interactive)
   (let* ((at (point))
-         (eol (line-end-position))
          (indent (save-excursion
                   (back-to-indentation)
                   (point))))
     (cond
-     ((= at eol)
+     ((eolp)
       (if (eobp)
           (progn
             (beep)
@@ -231,6 +230,13 @@
 ;; Which key is nice
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (which-key-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set file which customization is written to
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq custom-file (locate-user-emacs-file "custom.el"))
+(load custom-file)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -870,7 +876,7 @@ by using nxml's indentation rules."
  desktop-path '("~/.config/emacs/")
  ;; I'd like to override the name of the lock file too, but there is
  ;; no good interface for that.
- desktop-base-file-name "desktop")
+ desktop-base-file-name "desktop.el")
 (desktop-save-mode 1)
 
 (setq frame-resize-pixelwise t)
