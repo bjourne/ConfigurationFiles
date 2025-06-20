@@ -46,6 +46,9 @@ export TEXMFHOME=~/.local/share/texmf
 export TEXMFVAR=~/.cache/texlive/texmf-var
 export TEXMFCONFIG=~/.config/texlive/texmf-config
 
+export WGETRC="~/.config/wgetrc"
+echo hsts-file \= ~/.cache/wget-hsts > "$XDG_CONFIG_HOME/wgetrc"
+
 
 
 alias cp='cp -v'
@@ -57,6 +60,7 @@ alias history='fc -i -l -D 0'
 alias less='less -N -F'
 alias ls='eza -lA --group-directories-first --time-style=relative'
 alias mv='mv -v'
+alias nano='nano -l'
 alias pstree='pstree -T -p -h -C age'
 alias rm='rm -v'
 alias df='duf'
