@@ -247,48 +247,53 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; LSP, Flycheck, and Company
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package lsp-mode
-  :ensure t
-  :commands (lsp lsp-deferred)
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :config
-  (lsp-enable-which-key-integration t))
+;; (use-package lsp-mode
+;;   :ensure t
+;;   :commands (lsp lsp-deferred)
+;;   :init
+;;   (setq lsp-keymap-prefix "C-c l")
+;;   :config
+;;   (lsp-enable-which-key-integration t))
 
-(use-package company
-  :ensure t
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
-  :bind (:map company-mode-map
-              ("M-SPC" . 'company-complete))
-  :init
-  ;; Don't autoshow the completion popup
-  (setq company-minimum-prefix-length 1)
-  (setq company-idle-delay nil))
+;; (use-package company
+;;   :ensure t
+;;   :after lsp-mode
+;;   :hook (lsp-mode . company-mode)
+;;   :bind (:map company-mode-map
+;;               ("M-SPC" . 'company-complete))
+;;   :init
+;;   ;; Don't autoshow the completion popup
+;;   (setq company-minimum-prefix-length 1)
+;;   (setq company-idle-delay nil))
 
-(use-package flymake
-  :bind (:map flymake-mode-map
-              ("M-p" . flymake-goto-prev-error)
-              ("M-n" . flymake-goto-next-error)))
+;; (use-package flymake
+;;   :bind (:map flymake-mode-map
+;;               ("M-p" . flymake-goto-prev-error)
+;;               ("M-n" . flymake-goto-next-error)))
 
-(use-package flycheck
-  :ensure t
-  :after lsp-mode
-  :bind (:map flycheck-mode-map
-              ("M-p" . flycheck-previous-error)
-              ("M-n" . flycheck-next-error)))
+;; (use-package flycheck
+;;   :ensure t
+;;   :after lsp-mode
+;;   :bind (:map flycheck-mode-map
+;;               ("M-p" . flycheck-previous-error)
+;;               ("M-n" . flycheck-next-error)))
 
 
-(use-package lsp-pyright
-  :ensure t
-  :custom
-  (lsp-pyright-langserver-command "basedpyright")
-  (lsp-pyright-type-checking-mode "off")
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))
+;; (use-package lsp-pyright
+;;   :ensure t
+;;   :custom
+;;   (lsp-pyright-langserver-command "basedpyright")
+;;   (lsp-pyright-type-checking-mode "off")
+;;   :hook (python-mode . (lambda ()
+;;                           (require 'lsp-pyright)
+;;                           (lsp))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
@@ -613,6 +618,18 @@ by using nxml's indentation rules."
   (setq magit-last-seen-setup-instructions "1.4.0"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Typst
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'treesit-language-source-alist
+	     '(typst "https://github.com/uben0/tree-sitter-typst"))
+
+(use-package typst-ts-mode
+  :mode "\\.typ$"
+  :ensure t
+  :custom
+  (typst-ts-mode-watch-options "--open"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Shell
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package sh-mode
@@ -815,7 +832,7 @@ by using nxml's indentation rules."
                 ["p/ConfigurationFiles/dot-emacs"
                  "p/ConfigurationFiles/zshrc"]))
               ("Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz" .
-               ("Monaco 23" "~/"
+               ("Inconsolata LGC 22" "~/"
                 ["p/ConfigurationFiles/dot-emacs"
                  "p/ConfigurationFiles/zshrc"
                  "c/html/test.css"
