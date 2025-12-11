@@ -16,7 +16,10 @@
 
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
-;;(package-refresh-contents)
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(setq package-check-signature nil)
+(package-refresh-contents)
 (package-initialize)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -235,6 +238,8 @@
 ;; Set file which customization is written to
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq custom-file (locate-user-emacs-file "custom.el"))
+(unless (file-exists-p custom-file) (with-temp-buffer (write-file custom-file)))
+
 (load custom-file)
 
 
@@ -487,7 +492,8 @@
   )
 
 (use-package c-ts-mode
-  :if (treesit-language-available-p 'c)
+  :if (and (boundp 'treesit-language-available-p)
+           (treesit-language-available-p 'c))
   :custom
   (c-ts-mode-indent-offset 4)
   (c-ts-mode-indent-style #'my-c-ts-indent-style)
@@ -620,8 +626,9 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Typst
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'treesit-language-source-alist
-	     '(typst "https://github.com/uben0/tree-sitter-typst"))
+(when (boundp 'treesit-language-source-alist)
+      (add-to-list 'treesit-language-source-alist
+	     '(typst "https://github.com/uben0/tree-sitter-typst")))
 
 (use-package typst-ts-mode
   :mode "\\.typ$"
@@ -826,6 +833,10 @@ by using nxml's indentation rules."
 ;;    https://github.com/mps/fonts/blob/master/MONACO.TTF
 (setq-local device-configs
             '(
+	      ("11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz"
+	       "Inconsolata LGC 18"
+	       "pubwork/ConfigurationFiles/dot-emacs"
+	       [])
               ("Intel(R) Core(TM) Ultra 9 185H" .
                ("Inconsolata LGC 12"
                 "~/"
