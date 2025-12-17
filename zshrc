@@ -16,7 +16,7 @@ export TEXMFHOME=~/.local/share/texmf
 export TEXMFVAR=~/.cache/texlive/texmf-var
 export TEXMFCONFIG=~/.config/texlive/texmf-config
 
-export WGETRC="~/.config/wgetrc"
+export WGETRC="${HOME}/.config/wgetrc"
 echo hsts-file \= ~/.cache/wget-hsts > "$XDG_CONFIG_HOME/wgetrc"
 
 # Dont put shit in my ~
