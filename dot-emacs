@@ -238,9 +238,7 @@
 ;; Set file which customization is written to
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq custom-file (locate-user-emacs-file "custom.el"))
-(unless (file-exists-p custom-file) (with-temp-buffer (write-file custom-file)))
-
-(load custom-file)
+(load custom-file 'noerror)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
