@@ -1,4 +1,4 @@
-;; Copyright (C) 2025 Björn A. Lindqvist <bjourne@gmail.com>
+;; Copyright (C) 2025-2026 Björn A. Lindqvist <bjourne@gmail.com>
 ;;
 ;; The idea is to replace the contents of .emacs with
 ;;
@@ -19,7 +19,8 @@
 (add-to-list 'package-archives
              '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (setq package-check-signature nil)
-(package-refresh-contents)
+;; Slow as fuck
+;;(package-refresh-contents)
 (package-initialize)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -239,19 +240,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file 'noerror)
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Package management
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -829,6 +817,11 @@ by using nxml's indentation rules."
 ;;    https://github.com/dtinth/comic-mono-font
 ;; Monaco:
 ;;    https://github.com/mps/fonts/blob/master/MONACO.TTF
+;; User config overrides device-configs
+(setq-local user-configs
+            '(
+              ("bjourne_sfw" . "Monaco 18"))
+            )
 (setq-local device-configs
             '(
 	      ("11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz"
@@ -836,7 +829,7 @@ by using nxml's indentation rules."
 	       "pubwork/ConfigurationFiles/dot-emacs"
 	       [])
               ("Intel(R) Core(TM) Ultra 9 185H" .
-               ("Inconsolata LGC 12"
+               ("Monaco 12"
                 "~/"
                 ["p/ConfigurationFiles/dot-emacs"
                  "p/ConfigurationFiles/zshrc"]))
@@ -850,9 +843,12 @@ by using nxml's indentation rules."
                ("Inconsolata LGC 15" "~/" []))
               )
             )
+(defun preferred-font ()
+  (or (cdr (assoc (user-login-name) user-configs))
+      (nth 0 device-config)))
+
 (setq-local device-config
             (cdr (assoc (device-identity) device-configs)))
-(setq-local device-font (nth 0 device-config))
 (setq-local device-auto-open-root (nth 1 device-config))
 (setq-local device-auto-open-files (nth 2 device-config))
 
@@ -863,11 +859,11 @@ by using nxml's indentation rules."
 (setq custom-safe-themes t)
 
 (defun gui-theme ()
-  (set-face-attribute 'default nil
-                      :font device-font)
+  (set-face-attribute 'default nil :font (preferred-font))
   (when (string= (device-identity) "Intel(R) Core(TM) Ultra 9 185H")
-    (progn (load-theme 'solarized-dark)
-           (setq-default line-spacing 8)))
+    (when (string= (user-login-name) "bjourne")
+      (progn (load-theme 'solarized-dark)
+             (setq-default line-spacing 8))))
   (when (string= (device-identity) "Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz")
     (setq-default line-spacing 4))
   )
