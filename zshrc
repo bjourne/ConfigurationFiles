@@ -8,7 +8,7 @@ export XDG_CONFIG_HOME=~/.config
 
 mkdir -p ~/.config/ipython
 mkdir -p ~/.config/git
-touch ~/.config/git/config
+touch ${HOME}/.config/git/config
 export MPLAYER_HOME=~/.config/mplayer
 export PYTHON_HISTORY=~/.local/state/python_history
 
