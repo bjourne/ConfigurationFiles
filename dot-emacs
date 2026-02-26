@@ -822,35 +822,31 @@ by using nxml's indentation rules."
             '(
               ("bjourne_sfw" . "Monaco 18"))
             )
+
+;; Dict of device identity - configuration pairs. t/nil for whether I
+;; want a visible bell to not disturb coworkers.
 (setq-local device-configs
             '(
-	      ("11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz"
-	       "Inconsolata LGC 18"
-	       "pubwork/ConfigurationFiles/dot-emacs"
-	       [])
+	            ("11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz" .
+	             ("Inconsolata LGC 18" nil)
+	             )
               ("Intel(R) Core(TM) Ultra 9 185H" .
-               ("Monaco 12"
-                "~/"
-                ["p/ConfigurationFiles/dot-emacs"
-                 "p/ConfigurationFiles/zshrc"]))
+               ("Monaco 12" nil)
+	             )
               ("Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz" .
-               ("Inconsolata LGC 22" "~/"
-                ["p/ConfigurationFiles/dot-emacs"
-                 "p/ConfigurationFiles/zshrc"
-                 "c/html/test.css"
-                 ]))
+	             ("Inconsolata LGC 22" nil)
+	             )
               ("unknown" .
-               ("Inconsolata LGC 15" "~/" []))
-              )
-            )
+               ("Inconsolata LGC 15" nil)
+               )
+              ))
+(defun device-config ()
+  (cdr (assoc (device-identity) device-configs)))
+
 (defun preferred-font ()
   (or (cdr (assoc (user-login-name) user-configs))
-      (nth 0 device-config)))
+      (nth 0 (device-config))))
 
-(setq-local device-config
-            (cdr (assoc (device-identity) device-configs)))
-(setq-local device-auto-open-root (nth 1 device-config))
-(setq-local device-auto-open-files (nth 2 device-config))
 
 ;; Theme, possibly a different init should be used on windows.
 (global-font-lock-mode t)
@@ -866,6 +862,11 @@ by using nxml's indentation rules."
              (setq-default line-spacing 8))))
   (when (string= (device-identity) "Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz")
     (setq-default line-spacing 4))
+
+  (if (nth 1 (device-config))
+      (setq visible-bell t)
+    (setq ring-bell-function nil)
+    )
   )
 
 (defun console-theme ()
