@@ -98,7 +98,8 @@
   :bind (:map dired-mode-map
               ("h" . dired-up-directory)
               ("l" . dired-find-file))
-  :hook ((dired-mode . (lambda() (load "dired-x")))))
+  :hook ((dired-mode . (lambda() (load "dired-x"))))
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -347,11 +348,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Typescript
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package typescript-mode
-  :mode "\\.ts\\'"
-  :hook (typescript-mode . lsp-deferred)
-  :config
-  (setq typescript-indent-level 4))
+;; (use-package typescript-mode
+;;   :mode "\\.ts\\'"
+;;   :hook (typescript-mode . lsp-deferred)
+;;   :config
+;;   (setq typescript-indent-level 4))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; C-mode, Java, etc.
@@ -477,17 +478,20 @@
     )
   )
 
+(defun my-c-ts-mode-hook ()
+  (c-ts-mode-toggle-comment-style -1))
+
 (use-package c-ts-mode
-  :if (and (boundp 'treesit-language-available-p)
+  :if (and (fboundp 'treesit-language-available-p)
            (treesit-language-available-p 'c))
   :custom
   (c-ts-mode-indent-offset 4)
   (c-ts-mode-indent-style #'my-c-ts-indent-style)
-  :init
-  (add-hook 'c-ts-mode-hook
-            (lambda ()
-              (c-ts-mode-toggle-comment-style -1)))
+  (c-ts-mode-toggle-comment-style -1)
+
+  :hook (c-ts-mode . my-c-ts-mode-hook)
   ;; Remap the standard C/C++ modes
+  :config
   (add-to-list 'major-mode-remap-alist
                '(c-mode . c-ts-mode))
   (add-to-list 'major-mode-remap-alist
