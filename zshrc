@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2025 Björn A. Lindqvist <bjourne@gmail.com>
+# Copyright (C) 2024-2026 Björn A. Lindqvist <bjourne@gmail.com>
 
 ########################################################################
 # Stuff to make stupid programs obey XDG spec.
@@ -34,6 +34,9 @@ setopt nobanghist
 # Make some matching case insensitive
 setopt nocaseglob
 setopt nocasematch
+
+# Stop zsh from whining about empty matches
+setopt nonomatch
 
 
 zstyle ':omz:update' frequency 64
