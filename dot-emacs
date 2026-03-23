@@ -479,7 +479,13 @@
   )
 
 (defun my-c-ts-mode-hook ()
-  (c-ts-mode-toggle-comment-style -1))
+  (c-ts-mode-toggle-comment-style -1)
+  (setq-local whitespace-style '(tabs tab-mark))
+  (setq-local whitespace-display-mappings
+	      '((tab-mark 9 [187 9] [92 9])))
+  (setq-local indent-tabs-mode nil)
+  (whitespace-mode))
+
 
 (use-package c-ts-mode
   :if (and (fboundp 'treesit-language-available-p)
@@ -487,7 +493,6 @@
   :custom
   (c-ts-mode-indent-offset 4)
   (c-ts-mode-indent-style #'my-c-ts-indent-style)
-  (c-ts-mode-toggle-comment-style -1)
 
   :hook (c-ts-mode . my-c-ts-mode-hook)
   ;; Remap the standard C/C++ modes
@@ -838,8 +843,8 @@ by using nxml's indentation rules."
                ("Monaco 12" nil)
 	             )
               ("Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz" .
-	             ("Inconsolata LGC 22" nil)
-	             )
+	       ("Inconsolata LGC 22" t)
+	       )
               ("unknown" .
                ("Inconsolata LGC 15" nil)
                )
