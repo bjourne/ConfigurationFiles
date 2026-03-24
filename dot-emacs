@@ -619,6 +619,28 @@ by using nxml's indentation rules."
   (setq magit-last-seen-setup-instructions "1.4.0"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; DocView
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my-doc-view-mode-hook ()
+  (message "doc-view-hook running")
+  (auto-revert-mode)
+  (setq-local cursor-type t)
+  (setq-local blink-cursor-blinks 0)
+  )
+
+(use-package doc-view-mode
+  :hook (doc-view-mode . my-doc-view-mode-hook)
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Sudo Edit
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package sudo-edit
+  :ensure t
+  )
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Typst
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (boundp 'treesit-language-source-alist)
@@ -626,7 +648,7 @@ by using nxml's indentation rules."
 	     '(typst "https://github.com/uben0/tree-sitter-typst")))
 
 (use-package typst-ts-mode
-  :mode "\\.typ$"
+  :mode ("\\.typ$" "\\.typst$")
   :ensure t
   :custom
   (typst-ts-mode-watch-options "--open"))
