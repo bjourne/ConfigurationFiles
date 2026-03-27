@@ -244,18 +244,58 @@
 (load custom-file 'noerror)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ido!
+;; ido?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq ido-enable-flex-matching t
-      ido-everywhere t
-      ido-use-faces t
-      ido-max-prospects 10)
-(ido-mode t)
+;; (setq ido-enable-flex-matching t
+;;       ido-everywhere t
+;;       ido-use-faces t
+;;       ido-max-prospects 10)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; My tentative ido replacement:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package vertico
+  :ensure t
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :custom
+  (vertico-cycle t)
+  :init
+  (vertico-mode))
+
+(setq enable-recursive-minibuffers t)
+(minibuffer-depth-indicate-mode 1)
+
+;; Flexible matching (better than ido flex)
+(use-package orderless
+  :ensure t
+  :init
+  (setq completion-styles '(orderless)))
+
+;; Rich commands
+(use-package consult
+  :ensure t)
+
+;; Optional: annotations
+(use-package marginalia
+  :ensure t
+  :init (marginalia-mode))
+
+(use-package embark
+  :bind
+  (("C-." . embark-act)
+   ("C-;" . embark-dwim))
+  :init
+  (setq prefix-help-command 'embark-prefix-help-command))
+
+(global-set-key (kbd "C-x b") #'consult-buffer)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CSS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package rainbow-mode :ensure t)
+(use-package rainbow-mode
+  :ensure t)
 
 (use-package css-mode
   :init
