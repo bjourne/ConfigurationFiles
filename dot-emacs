@@ -253,16 +253,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; My tentative ido replacement:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my/sort-files (els)
+  (let ((is-dir (apply-partially #'string-suffix-p "/")))
+    (append (sort (seq-filter is-dir els))
+	          (sort (seq-remove is-dir els)))))
+
 (use-package vertico
   :ensure t
-  :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
   :custom
   (vertico-cycle t)
+  (vertico-count 20)
   :init
-  (vertico-mode))
+  (vertico-mode)
+  (vertico-multiform-mode))
+
+(setq vertico-multiform-categories
+      '((file (vertico-sort-function . my/sort-files)
+	            (:keymap . vertico-directory-map))))
+
 
 (setq enable-recursive-minibuffers t)
 (minibuffer-depth-indicate-mode 1)
