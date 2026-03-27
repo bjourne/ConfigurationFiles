@@ -860,36 +860,39 @@ by using nxml's indentation rules."
 ;;    https://github.com/dtinth/comic-mono-font
 ;; Monaco:
 ;;    https://github.com/mps/fonts/blob/master/MONACO.TTF
-;; User config overrides device-configs
-(setq-local user-configs
-            '(
-              ("bjourne_sfw" . "Monaco 18"))
-            )
+(setq-local ultra9 "Intel(R) Core(TM) Ultra 9 185H")
+(setq-local xeon "Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz")
+(setq-local gen11 "11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz")
+(setq-local ultra9-setup
+            (lambda ()
+	            (load-theme 'solarized-dark)
+	            (setq-default line-spacing 8)
+	            (set-face-background 'mode-line-active "#174662")))
 
-;; Dict of device identity - configuration pairs. t/nil for whether I
-;; want a visible bell to not disturb coworkers.
+(setq-local xeon-setup
+            (lambda ()
+              (setq-default line-spacing 4)))
+
 (setq-local device-configs
-            '(
-	            ("11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz" .
-	             ("Inconsolata LGC 18" nil)
-	             )
-              ("Intel(R) Core(TM) Ultra 9 185H" .
-               ("Monaco 12" nil)
-	             )
-              ("Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz" .
-	       ("Inconsolata LGC 22" t)
-	       )
-              ("unknown" .
-               ("Inconsolata LGC 15" nil)
-               )
+            `(
+              ((,ultra9 "bjourne_sfw")
+	             "Inconsolata LGC 18" nil nil)
+              ((,ultra9 "bjourne")
+	             "Monaco 12" nil ,ultra9-setup)
+              ((,xeon   "bjourne")
+	             "Inconsolata LGC 22" t ,xeon-setup)
+              ((,gen11  "bjourne")
+	             "Inconsolata LGC 18" nil nil)
+              (nil
+	             "Inconsolata LGC 18" nil nil)
               ))
+
+(defun config-key ()
+  (list (device-identity) (user-login-name)))
+
+
 (defun device-config ()
-  (cdr (assoc (device-identity) device-configs)))
-
-(defun preferred-font ()
-  (or (cdr (assoc (user-login-name) user-configs))
-      (nth 0 (device-config))))
-
+  (cdr (assoc (config-key) device-configs)))
 
 ;; Theme, possibly a different init should be used on windows.
 (global-font-lock-mode t)
@@ -898,19 +901,15 @@ by using nxml's indentation rules."
 (setq custom-safe-themes t)
 
 (defun gui-theme ()
-  (set-face-attribute 'default nil :font (preferred-font))
-  (when (string= (device-identity) "Intel(R) Core(TM) Ultra 9 185H")
-    (when (string= (user-login-name) "bjourne")
-      (progn (load-theme 'solarized-dark)
-             (setq-default line-spacing 8))))
-  (when (string= (device-identity) "Intel(R) Xeon(R) W-2245 CPU @ 3.90GHz")
-    (setq-default line-spacing 4))
-
-  (if (nth 1 (device-config))
-      (setq visible-bell t)
-    (setq ring-bell-function nil)
-    )
-  )
+  (let* ((config (device-config))
+         (font (nth 0 config))
+         (no-bell? (nth 1 config))
+         (custom-fun (nth 2 config)))
+    (set-face-attribute 'default nil :font font)
+    (if no-bell?
+        (setq visible-bell t)
+      (setq ring-bell-function nil))
+    (funcall custom-fun)))
 
 (defun console-theme ()
   (custom-set-faces
