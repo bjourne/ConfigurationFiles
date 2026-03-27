@@ -578,15 +578,18 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DocView
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun my-doc-view-mode-hook ()
+(defun my/dv-hook()
   (message "doc-view-hook running")
   (auto-revert-mode)
   (setq-local cursor-type t)
   (setq-local blink-cursor-blinks 0)
+  ;; To prevent doc-view from printing annoying messages when it
+  ;; auto-reverts.
+  (setq-local inhibit-message t)
   )
 
 (use-package doc-view-mode
-  :hook (doc-view-mode . my-doc-view-mode-hook)
+  :hook (doc-view-mode . my/dv-hook)
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -608,6 +611,7 @@ by using nxml's indentation rules."
   :mode ("\\.typ$" "\\.typst$")
   :ensure t
   :custom
+  (typst-ts-preview-function #'find-file)
   (typst-ts-mode-watch-options "--open"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
