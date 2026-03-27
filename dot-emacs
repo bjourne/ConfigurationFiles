@@ -14,10 +14,11 @@
 ;; Must call this
 (require 'package)
 
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/") t)
-(add-to-list 'package-archives
-             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+;; Add MELPA repos
+(nconc package-archives
+       '(("melpa" . "https://melpa.org/packages/")
+         ("melpa-stable" . "https://stable.melpa.org/packages/")))
+
 (setq package-check-signature nil)
 ;; Slow as fuck
 ;;(package-refresh-contents)
@@ -242,56 +243,13 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file 'noerror)
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; LSP, Flycheck, and Company
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package lsp-mode
-;;   :ensure t
-;;   :commands (lsp lsp-deferred)
-;;   :init
-;;   (setq lsp-keymap-prefix "C-c l")
-;;   :config
-;;   (lsp-enable-which-key-integration t))
-
-;; (use-package company
-;;   :ensure t
-;;   :after lsp-mode
-;;   :hook (lsp-mode . company-mode)
-;;   :bind (:map company-mode-map
-;;               ("M-SPC" . 'company-complete))
-;;   :init
-;;   ;; Don't autoshow the completion popup
-;;   (setq company-minimum-prefix-length 1)
-;;   (setq company-idle-delay nil))
-
-;; (use-package flymake
-;;   :bind (:map flymake-mode-map
-;;               ("M-p" . flymake-goto-prev-error)
-;;               ("M-n" . flymake-goto-next-error)))
-
-;; (use-package flycheck
-;;   :ensure t
-;;   :after lsp-mode
-;;   :bind (:map flycheck-mode-map
-;;               ("M-p" . flycheck-previous-error)
-;;               ("M-n" . flycheck-next-error)))
-
-
-;; (use-package lsp-pyright
-;;   :ensure t
-;;   :custom
-;;   (lsp-pyright-langserver-command "basedpyright")
-;;   (lsp-pyright-type-checking-mode "off")
-;;   :hook (python-mode . (lambda ()
-;;                           (require 'lsp-pyright)
-;;                           (lsp))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ido!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq ido-enable-flex-matching t
-      ido-everywhere t)
+      ido-everywhere t
+      ido-use-faces t
+      ido-max-prospects 10)
 (ido-mode t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -546,7 +504,6 @@
 
 
 ;; Better uniquify
-(require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 
 (defun rename-file-and-buffer (new-name)
@@ -759,6 +716,8 @@ by using nxml's indentation rules."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spelling
+;;
+;; Spell-checking just doesn't work well in Emacs...
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when is-windows
   (add-to-list 'exec-path "C:/Program Files (x86)/Aspell/bin/")
@@ -791,7 +750,8 @@ by using nxml's indentation rules."
   (flyspell-buffer)
   (message (format "Switched to %s" name)))
 
-;; This nice code comes from https://stackoverflow.com/questions/27544869/how-do-i-change-ispell-private-dictionary
+;; This nice code comes from
+;; https://stackoverflow.com/questions/27544869/how-do-i-change-ispell-private-dictionary
 (defun my-ispell-change-dictionaries ()
   "Switch between language dictionaries."
   (interactive)
