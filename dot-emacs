@@ -288,7 +288,9 @@
 ;; Optional: annotations
 (use-package marginalia
   :ensure t
-  :init (marginalia-mode))
+  :init (marginalia-mode)
+  :bind (:map minibuffer-local-map
+         ("M-a" . marginalia-cycle)))
 
 (use-package embark
   :bind
@@ -641,6 +643,23 @@ by using nxml's indentation rules."
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; DocView
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my/pdf-hook ()
+  (message "pdf-view-hook running")
+  (auto-revert-mode)
+  ;; Give me my blinks!
+  (setq-local cursor-type 'box)
+  (setq-local blink-cursor-blinks 0)
+  (blink-cursor-mode 1)
+  )
+(use-package pdf-tools
+  :config
+  (pdf-tools-install)
+  :hook (pdf-view-mode . my/pdf-hook)
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sudo Edit
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package sudo-edit
@@ -890,7 +909,6 @@ by using nxml's indentation rules."
 (defun config-key ()
   (list (device-identity) (user-login-name)))
 
-
 (defun device-config ()
   (cdr (assoc (config-key) device-configs)))
 
@@ -901,10 +919,7 @@ by using nxml's indentation rules."
 (setq custom-safe-themes t)
 
 (defun gui-theme ()
-  (let* ((config (device-config))
-         (font (nth 0 config))
-         (no-bell? (nth 1 config))
-         (custom-fun (nth 2 config)))
+  (cl-destructuring-bind (font no-bell? custom-fun) (device-config)
     (set-face-attribute 'default nil :font font)
     (if no-bell?
         (setq visible-bell t)
