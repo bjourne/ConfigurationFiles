@@ -124,7 +124,7 @@
 	    (fill-region lo hi)
 	  (fill-paragraph))))))
 
-(global-set-key "\M-q" 'toggle-filling)
+(global-set-key (kbd "M-q") 'toggle-filling)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved navigation
@@ -281,16 +281,16 @@
   :init
   (setq completion-styles '(orderless)))
 
-;; Rich commands
 (use-package consult
-  :ensure t)
+  :ensure t
+  :bind
+  (:map global-map
+        ("C-x b" . #'consult-buffer)))
 
 ;; Optional: annotations
 (use-package marginalia
   :ensure t
-  :init (marginalia-mode)
-  :bind (:map minibuffer-local-map
-         ("M-a" . marginalia-cycle)))
+  :init (marginalia-mode))
 
 (use-package embark
   :bind
@@ -298,8 +298,6 @@
    ("C-;" . embark-dwim))
   :init
   (setq prefix-help-command 'embark-prefix-help-command))
-
-(global-set-key (kbd "C-x b") #'consult-buffer)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CSS
@@ -899,7 +897,7 @@ by using nxml's indentation rules."
               ((,ultra9 "bjourne")
 	             "Monaco 12" nil ,ultra9-setup)
               ((,xeon   "bjourne")
-	             "Inconsolata LGC 22" t ,xeon-setup)
+	             "Inconsolata LGC 23" t ,xeon-setup)
               ((,gen11  "bjourne")
 	             "Inconsolata LGC 18" nil nil)
               (nil
