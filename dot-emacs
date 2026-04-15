@@ -925,7 +925,7 @@ by using nxml's indentation rules."
     (if no-bell?
         (setq visible-bell t)
       (setq ring-bell-function nil))
-    (funcall custom-fun)))
+    (when custom-fun (funcall custom-fun))))
 
 (defun console-theme ()
   (custom-set-faces
