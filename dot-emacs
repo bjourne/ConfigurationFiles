@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;; Copyright (C) 2025-2026 Björn A. Lindqvist <bjourne@gmail.com>
 ;;
 ;; The idea is to replace the contents of .emacs with
@@ -14,14 +15,33 @@
 ;; Must call this
 (require 'package)
 
+(defun read-file-as-text-safe (path fallback)
+  (if (file-exists-p path)
+      (with-temp-buffer
+	(insert-file-contents path)
+	(buffer-string))
+    fallback))
+
+(defun maybe-package-refresh-contents (cache-dur)
+  (let* ((cookie (concat config-base "package-cookie"))
+	 (safe-until (string-to-number (read-file-as-text-safe cookie "0")))
+	 (now (time-convert nil 'integer))
+	 (update-p (> now safe-until))
+	 (lasts-until (+ now cache-dur)))
+    (if update-p
+	(progn
+	  (package-refresh-contents)
+	  (write-region (number-to-string lasts-until) nil cookie)
+	  )
+      (message "Skipping refreshing package contents"))))
+
 ;; Add MELPA repos
 (nconc package-archives
        '(("melpa" . "https://melpa.org/packages/")
          ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 (setq package-check-signature nil)
-;; Slow as fuck
-;;(package-refresh-contents)
+(maybe-package-refresh-contents 7200)
 (package-initialize)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -896,7 +916,7 @@ by using nxml's indentation rules."
 (setq-local device-configs
             `(
               ((,ultra9 "bjourne_sfw")
-	             "Inconsolata LGC 18" nil nil)
+		      "Inconsolata LGC 18" nil nil)
               ((,ultra9 "bjourne")
 	             "Monaco 12" nil ,ultra9-setup)
               ((,xeon   "bjourne")
