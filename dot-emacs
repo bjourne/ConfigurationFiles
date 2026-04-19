@@ -317,11 +317,16 @@
   :init (marginalia-mode))
 
 (use-package embark
+  :ensure t
   :bind
   (("C-." . embark-act)
    ("C-;" . embark-dwim))
   :init
   (setq prefix-help-command 'embark-prefix-help-command))
+
+(use-package embark-consult
+  :ensure t
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CSS
@@ -647,11 +652,12 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package magit
   :ensure t
+  :defer t
   :init
   (setq magit-last-seen-setup-instructions "1.4.0"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DocView
+;; DocView & PdfTools
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my/dv-hook()
   (message "doc-view-hook running")
@@ -660,29 +666,25 @@ by using nxml's indentation rules."
   (setq-local blink-cursor-blinks 0)
   ;; To prevent doc-view from printing annoying messages when it
   ;; auto-reverts.
-  (setq-local inhibit-message t)
-  )
+  (setq-local inhibit-message t))
 
 (use-package doc-view-mode
-  :hook (doc-view-mode . my/dv-hook)
-  )
+  :hook (doc-view-mode . my/dv-hook))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DocView
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my/pdf-hook ()
-  (message "pdf-view-hook running")
+  (message "my/pdf-hook running")
   (auto-revert-mode)
-  ;; Give me my blinks!
+  (setq-local auto-revert-verbose nil)
   (setq-local cursor-type 'box)
   (setq-local blink-cursor-blinks 0)
-  (blink-cursor-mode 1)
-  )
+  (blink-cursor-mode 1))
+
 (use-package pdf-tools
+  :ensure t
+  :defer nil
   :config
-  (pdf-tools-install)
-  :hook (pdf-view-mode . my/pdf-hook)
-  )
+  (pdf-loader-install)
+  :hook (pdf-view-mode . my/pdf-hook))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sudo Edit
