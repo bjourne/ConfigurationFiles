@@ -4,7 +4,9 @@
 # Stuff to make stupid programs obey XDG spec.
 ########################################################################
 
+# I shouldn't have to set these explicitly, but I do
 export XDG_CONFIG_HOME=~/.config
+export XDG_CACHE_HOME=~/.cache
 
 mkdir -p ~/.config/ipython
 mkdir -p ~/.config/git
@@ -15,6 +17,7 @@ export PYTHON_HISTORY=~/.local/state/python_history
 export TEXMFHOME=~/.local/share/texmf
 export TEXMFVAR=~/.cache/texlive/texmf-var
 export TEXMFCONFIG=~/.config/texlive/texmf-config
+export GTK2_RC_FILES=~/.config/gtk-2.0/gtkrc
 
 export WGETRC="${HOME}/.config/wgetrc"
 echo hsts-file \= ~/.cache/wget-hsts > "$XDG_CONFIG_HOME/wgetrc"
