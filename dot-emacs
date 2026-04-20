@@ -60,6 +60,7 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
+(tab-bar-mode -1)
 (setq frame-title-format "%b")
 (setq icon-title-format frame-title-format)
 
@@ -535,12 +536,10 @@
   :hook
   ('c-ts-mode . #'my/c-ts-mode-hook)
   :config
-  (add-to-list 'major-mode-remap-alist
-               '(c-mode . c-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(c++-mode . c++-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(c-or-c++-mode . c-or-c++-ts-mode)))
+  (setq major-mode-remap-alist
+	'((c-mode . c-ts-mode)
+	  (c++-mode . c++-ts-mode)
+	  (c-or-c++-mode . c-or-c++-ts-mode))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Fixed emacs bad defaults.
