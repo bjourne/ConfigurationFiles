@@ -46,7 +46,7 @@
 
 (setq package-check-signature nil)
 (package-initialize)
-(fun-call-infrequently #'package-refresh-contents 7200)
+(fun-call-infrequently #'package-refresh-contents 86400)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup config
@@ -923,7 +923,7 @@ by using nxml's indentation rules."
               ((,ultra9 "bjourne_sfw")
 		      "Inconsolata LGC 18" nil nil)
               ((,ultra9 "bjourne")
-	             "Monaco 12" nil ,ultra9-setup)
+	             "Inconsolata LGC 12" nil ,ultra9-setup)
               ((,xeon   "bjourne")
 	             "Inconsolata LGC 23" t ,xeon-setup)
               ((,gen11  "bjourne")
@@ -947,6 +947,8 @@ by using nxml's indentation rules."
 (defun gui-theme ()
   (cl-destructuring-bind (font no-bell? custom-fun) (device-config)
     (set-face-attribute 'default nil :font font)
+    ;; This should be the default.
+    (set-face-attribute 'fixed-pitch nil :family 'unspecified)
     (if no-bell?
         (setq visible-bell t)
       (setq ring-bell-function nil))
