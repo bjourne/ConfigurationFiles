@@ -32,7 +32,7 @@
       (progn
         (funcall fun)
         (f-write-text (number-to-string (+ now dur)) 'utf-8 path))
-    (message "Skipping call to %s" name))))
+      (message "Skipping call to %s" name))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package manager initialization
@@ -126,7 +126,6 @@
               ("l" . dired-find-file))
   :hook ((dired-mode . (lambda() (load "dired-x"))))
   )
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved fill-paragraph
@@ -429,6 +428,66 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; c-ts-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my/preproc-node-p (node)
+  (string-prefix-p "preproc" (treesit-node-type node)))
+
+(defun my/containers ()
+  (map-keys (my/container-fields)))
+
+(defun my/containers+compound ()
+  (cons "compound_statement" (my/containers)))
+
+(defun my/container-fields ()
+  '(("if_statement" . "consequence")
+		("for_statement" . "body")
+		("while_statement" . "body")))
+
+(defun my/empty-container (node)
+  (let ((field (cdr (assoc (treesit-node-type node)
+                           (my/container-fields)))))
+    (when-let ((body (treesit-node-child-by-field-name node field)))
+      (zerop (- (treesit-node-end body) (treesit-node-start body))))))
+
+;; Closest sibling, discouning preprocessor directives.
+(defun my/c-prev-sibling (node)
+  (let ((s (treesit-node-prev-sibling node)))
+    (if (my/preproc-node-p s)
+          (my/c-prev-sibling s)
+      s)))
+
+;; Sibling is actual parent if it is an empty container and there is a
+;; macro in the way.
+(defun my/sibling-is-parent (node sibling)
+  (and
+   sibling
+   (member (treesit-node-type sibling) (my/containers))
+   (my/empty-container sibling)
+   (or (string-match-p "preproc_if"
+                       (treesit-node-type node))
+       (string-match-p "preproc_def"
+                       (treesit-node-type (treesit-node-prev-sibling node))))))
+
+;; Actual parent, discounting preprocessor directives and
+;; tree-sitter parsing issues.
+(defun my/c-parent (node)
+  (let ((real-sibling (my/c-prev-sibling node)))
+    (if (my/sibling-is-parent node real-sibling)
+        real-sibling
+      (let ((parent (treesit-node-parent node)))
+        (if (my/preproc-node-p parent)
+	          (my/c-parent parent)
+          parent)))))
+
+;; True if the actual parent is a container
+(defun my/c-parent-is-container (node parent &rest _)
+  (member (treesit-node-type (my/c-parent node))
+          (my/containers+compound)))
+
+(defun my/real-c-parent-bol (node parent &rest _)
+  (save-excursion
+    (goto-char (treesit-node-start (my/real-c-parent node)))
+    (back-to-indentation)
+    (point)))
 
 ;; Preprocessor directives are annoying.
 (defun my/c-ts-indent-style ()
@@ -455,24 +514,25 @@
        ((node-is "}") standalone-parent 0)
        ((parent-is "\\`declaration\\'") parent-bol 0)
 
-       ;; Body
-       ((parent-is "compound_statement") standalone-parent ,ofs)
-       ;; Stupid hack for preprocessor
-       ((n-p-gp nil "preproc" "compound_statement") standalone-parent ,ofs)
-
-      ;; This was here before to handle dangling elses. But the
-      ;; function was deleted from c-ts-mode.
-      ;;(c-ts-mode--else-heuristic prev-line ,ofs)
-
-      ;; This rule matches foo = \\nblah.
+       ;; This rule matches foo = \\nblah.
        ((parent-is "assignment_expression") parent-bol ,ofs)
+       ((parent-is "init_declarator") standalone-parent, ofs)
+
+
+       ;; Body
+       ;;((parent-is "compound_statement") standalone-parent ,ofs)
+       ;; Stupid hack for preprocessor
+       ;;((n-p-gp nil "preproc_if" "compound_statement") standalone-parent ,ofs)
+
+       ;; This was here before to handle dangling elses. But the
+       ;; function was deleted from c-ts-mode.
+       ;;(c-ts-mode--else-heuristic prev-line ,ofs)
 
        ;; Tertiary exprs
        ((node-is ":") (nth-sibling 1) 0)
 
        ;; Switch/case
        ((node-is "case") standalone-parent 0)
-       ((parent-is "case_statement") standalone-parent ,ofs)
 
        ;; Goto labels
        ((node-is "labeled_statement") standalone-parent ,half-ofs)
@@ -484,11 +544,10 @@
 
        ;; If statements
        ((node-is "else") parent-bol 0)
-       ((parent-is "if_statement") standalone-parent ,ofs)
-       ((parent-is "else_clause") standalone-parent ,ofs)
 
-       ;; While
-       ((parent-is "while_statement") standalone-parent ,ofs)
+       ;; Collects all one indent relative to the parent. Note that it
+       ;; needs to go below higher priority rules.
+       (my/real-c-parent-is-container my/real-c-parent-bol ,ofs)
 
        ;; Multi-line strings
        ((parent-is "concatenated_string") first-sibling 0)
@@ -512,8 +571,6 @@
        ((match nil "parenthesized_expression" nil 0 1) parent-bol ,ofs)
        ((match nil "parenthesized_expression" nil 2 nil) (nth-sibling 1) 0)
 
-       ;; IDK
-       ((parent-is "binary_expression") parent 0)
        )
       ))
   )
