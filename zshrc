@@ -4,15 +4,23 @@
 # Stuff to make stupid programs obey XDG spec.
 ########################################################################
 
+set -e -u
+
 # I shouldn't have to set these explicitly, but I do
 export XDG_CONFIG_HOME=~/.config
+export XDG_DATA_HOME=$XDG_CONFIG_HOME
+export XDG_DATA_STATE=$XDG_CONFIG_HOME
 export XDG_CACHE_HOME=~/.cache
 
-mkdir -p ~/.config/ipython
-mkdir -p ~/.config/git
+mkdir -p $XDG_CONFIG_HOME/git
+mkdir -p $XDG_CONFIG_HOME/ipython
+mkdir -p $XDG_CONFIG_HOME/npm
+
 touch ${HOME}/.config/git/config
 export MPLAYER_HOME=~/.config/mplayer
 export PYTHON_HISTORY=~/.local/state/python_history
+
+export NPM_CONFIG_USERCONFIG=$XDG_CONFIG_HOME/npm/npmrc
 
 export TEXMFHOME=~/.local/share/texmf
 export TEXMFVAR=~/.cache/texlive/texmf-var
@@ -52,16 +60,15 @@ export ZSH="$HOME/.config/oh-my-zsh"
 
 export ZSH_THEME="bureau"
 
+set +e +u
 source $ZSH/oh-my-zsh.sh
+set -e -u
 
 # Directory sizes, (ls --total-size works better)
 alias tuf='du -sk * | sort -n | while read size fname; do for unit in k M G T P E Z Y; do if [ $size -lt 1024 ]; then echo -e "${size}${unit}\t${fname}"; break; fi; size=$((size/1024)); done; done'
 alias tuf2='du -sk * 2>/dev/null | sort -n | perl -ne '\''($s,$f)=split(m{\t});for (qw(K M G)) {if($s<1024) {printf("%7.1f",$s);print "$_   $f"; last};$s=$s/1024}'\'
 
 # History
-# setopt histignorealldups
-# setopt histsavenodups
-
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
