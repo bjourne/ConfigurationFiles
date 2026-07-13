@@ -133,20 +133,20 @@
 (defun toggle-filling ()
   (interactive)
   (let* ((reg-p (use-region-p))
-	 (lo (if reg-p (region-beginning)
-	       (save-excursion (backward-paragraph) (point))))
-	 (hi (if reg-p (region-end)
-	       (save-excursion (forward-paragraph) (point))))
-	 (old (buffer-substring-no-properties lo hi)))
+	       (lo (if reg-p (region-beginning)
+	             (save-excursion (backward-paragraph) (point))))
+	       (hi (if reg-p (region-end)
+	             (save-excursion (forward-paragraph) (point))))
+	       (old (buffer-substring-no-properties lo hi)))
     (if (use-region-p)
-	(fill-region lo hi)
+	      (fill-region lo hi)
       (fill-paragraph))
     (let* ((new (buffer-substring-no-properties lo hi))
-	   (fill-column 9999))
+	         (fill-column 9999))
       (when (string= new old)
-	(if reg-p
-	    (fill-region lo hi)
-	  (fill-paragraph))))))
+	      (if reg-p
+	          (fill-region lo hi)
+	        (fill-paragraph))))))
 
 (global-set-key (kbd "M-q") 'toggle-filling)
 
@@ -483,6 +483,10 @@
   (member (treesit-node-type (my/c-parent node))
           (my/containers+compound)))
 
+(defun my/c-parent-is (type)
+  (lambda (node parent &rest _)
+    (string-match-p type (treesit-node-type (my/c-parent node)))))
+
 (defun my/real-c-parent-bol (node parent &rest _)
   (save-excursion
     (goto-char (treesit-node-start (my/real-c-parent node)))
@@ -496,7 +500,7 @@
     `((c
 
        ;; Declarations outside of functions should generally be at column 0.
-       ((parent-is "translation_unit") column-0 0)
+       ((my/c-parent-is "translation_unit") column-0 0)
        ((n-p-gp nil "declaration" "translation_unit") column-0 0)
        ((node-is "function_declarator") column-0 0)
 
@@ -570,7 +574,6 @@
 
        ((match nil "parenthesized_expression" nil 0 1) parent-bol ,ofs)
        ((match nil "parenthesized_expression" nil 2 nil) (nth-sibling 1) 0)
-
        )
       ))
   )
