@@ -96,7 +96,7 @@ alias diff='diff --color=always -u'
 alias egrep="egrep --color=auto"
 alias grep='grep -n --color=auto'
 alias history='fc -i -l -D 0'
-alias less='less -N -F'
+alias less='less -N -F -R'
 alias ls='eza -lA --group-directories-first --time-style=relative'
 alias mv='mv -v'
 alias nano='nano -l'
