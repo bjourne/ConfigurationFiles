@@ -103,3 +103,5 @@ alias nano='nano -l'
 alias pstree='pstree -T -p -h -C age'
 alias rm='rm -v'
 alias df='duf'
+
+set +e +u
