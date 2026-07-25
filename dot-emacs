@@ -148,8 +148,6 @@
 	          (fill-region lo hi)
 	        (fill-paragraph))))))
 
-(global-set-key (kbd "M-q") 'toggle-filling)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Improved navigation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -190,8 +188,6 @@
       (back-to-indentation))
      (t (end-of-line)))))
 
-(global-set-key [remap move-beginning-of-line] 'smarter-move-beginning)
-(global-set-key [remap move-end-of-line] 'smarter-move-end)
 
 (defun smarter-vl-move-end ()
   (interactive)
@@ -687,25 +683,22 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Global keybindings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(global-set-key "\M-g" 'goto-line)
+(defconst my/global-keys
+  '(("<delete>" delete-horizontal-space-forward)
+    ("<backspace>" backward-delete-char-untabify)
+    ("C-c c" comment-dwim)
+    ("C-x C-b" ibuffer)
+    ("C-z" undo)
+    ("M-g" goto-line)
+    ("M-q" toggle-filling)
+    ("M-SPC" hippie-expand)
+    ("<remap> <move-beginning-of-line>" smarter-move-beginning)
+    ("<remap> <move-end-of-line>" smarter-move-end)
+    ))
+(dolist (binding my/global-keys)
+  (apply #'keymap-global-set binding))
 
-;; Dabbrev stuff
-(global-set-key (kbd "M-SPC") 'hippie-expand)
-
-;; comment-dwim on C-c c
-(global-set-key (kbd "C-c c") 'comment-dwim)
-
-;; Basic stuff
-(global-set-key "\C-z" 'undo)
-(global-set-key "\C-?" 'backward-delete-char-untabify)
-(global-set-key [delete] 'delete-horizontal-space-forward)
-
-;; Move between windows
 (windmove-default-keybindings)
-
-;; Ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Magit
