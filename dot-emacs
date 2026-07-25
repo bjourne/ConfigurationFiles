@@ -435,8 +435,8 @@
 
 (defun my/container-fields ()
   '(("if_statement" . "consequence")
-		("for_statement" . "body")
-		("while_statement" . "body")))
+    ("for_statement" . "body")
+    ("while_statement" . "body")))
 
 (defun my/empty-container (node)
   (let ((field (cdr (assoc (treesit-node-type node)
@@ -444,7 +444,7 @@
     (when-let* ((body (treesit-node-child-by-field-name node field)))
       (zerop (- (treesit-node-end body) (treesit-node-start body))))))
 
-;; Closest sibling, discouning preprocessor directives.
+;; Closest non-preprocessor sibling.
 (defun my/c-prev-sibling (node)
   (let ((s (treesit-node-prev-sibling node)))
     (if (my/preproc-node-p s)
@@ -459,9 +459,9 @@
    (member (treesit-node-type sibling) (my/containers))
    (my/empty-container sibling)
    (or (string-match-p "preproc_if"
-                       (treesit-node-type node))
+		       (treesit-node-type node))
        (string-match-p "preproc_def"
-                       (treesit-node-type
+		       (treesit-node-type
 			(treesit-node-prev-sibling node))))))
 
 ;; Actual parent, discounting preprocessor directives and
@@ -482,18 +482,30 @@
 
 (defun my/c-parent-is (type)
   (lambda (node parent &rest _)
-    (string-match-p type (treesit-node-type (my/c-parent node)))))
+    (when-let* ((c-parent (my/c-parent node)))
+      (string-match-p type (treesit-node-type c-parent)))))
 
 (defun my/c-parent-bol (node parent &rest _)
   (save-excursion
+    (message "c-parent of node %s is %s" node (my/c-parent node))
     (goto-char (treesit-node-start (my/c-parent node)))
     (back-to-indentation)
     (point)))
 
+(defun my/node-is-one-of (types)
+  (lambda (node parent &rest _)
+    (member (treesit-node-type node) types)))
+
 ;; Preprocessor directives are annoying.
 (defun my/c-ts-indent-style ()
   (let ((ofs c-ts-mode-indent-offset)
-        (half-ofs (/ c-ts-mode-indent-offset 2)))
+        (half-ofs (/ c-ts-mode-indent-offset 2))
+	(list-types '("argument_list"
+		      "enumerator_list"
+		      "field_declaration_list"
+		      "initializer_list"
+		      "parameter_list"
+		      "parenthesized_expression")))
     `((c
 
        ;; Declarations outside of functions should generally be at column 0.
@@ -519,16 +531,6 @@
        ((parent-is "assignment_expression") parent-bol ,ofs)
        ((parent-is "init_declarator") standalone-parent, ofs)
 
-
-       ;; Body
-       ;;((parent-is "compound_statement") standalone-parent ,ofs)
-       ;; Stupid hack for preprocessor
-       ;;((n-p-gp nil "preproc_if" "compound_statement") standalone-parent ,ofs)
-
-       ;; This was here before to handle dangling elses. But the
-       ;; function was deleted from c-ts-mode.
-       ;;(c-ts-mode--else-heuristic prev-line ,ofs)
-
        ;; Tertiary exprs
        ((node-is ":") (nth-sibling 1) 0)
 
@@ -546,14 +548,11 @@
        ;; If statements
        ((node-is "else") parent-bol 0)
 
-       ;; Collects all one indent relative to the parent. Note that it
-       ;; needs to go below higher priority rules.
-       (my/c-parent-is-container my/c-parent-bol ,ofs)
-
        ;; Multi-line strings
        ((parent-is "concatenated_string") first-sibling 0)
 
        ;; Linup indentation or one-level indentation
+       (,(my/node-is-one-of list-types) parent-bol ,ofs)
        ((match nil "enumerator_list" nil 0 1) parent-bol ,ofs)
        ((match nil "enumerator_list" nil 2 nil) (nth-sibling 1) 0)
 
@@ -571,9 +570,16 @@
 
        ((match nil "parenthesized_expression" nil 0 1) parent-bol ,ofs)
        ((match nil "parenthesized_expression" nil 2 nil) (nth-sibling 1) 0)
+
+       ;; Collects all one indent relative to the parent. Note that it
+       ;; needs to go below higher priority rules.
+       (my/c-parent-is-container my/c-parent-bol ,ofs)
+
        )
       ))
   )
+
+
 
 (defun my/c-ts-mode-hook ()
   (c-ts-mode-toggle-comment-style -1)
