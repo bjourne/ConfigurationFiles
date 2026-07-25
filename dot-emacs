@@ -445,7 +445,7 @@
 (defun my/empty-container (node)
   (let ((field (cdr (assoc (treesit-node-type node)
                            (my/container-fields)))))
-    (when-let ((body (treesit-node-child-by-field-name node field)))
+    (when-let* ((body (treesit-node-child-by-field-name node field)))
       (zerop (- (treesit-node-end body) (treesit-node-start body))))))
 
 ;; Closest sibling, discouning preprocessor directives.
@@ -465,14 +465,15 @@
    (or (string-match-p "preproc_if"
                        (treesit-node-type node))
        (string-match-p "preproc_def"
-                       (treesit-node-type (treesit-node-prev-sibling node))))))
+                       (treesit-node-type
+			(treesit-node-prev-sibling node))))))
 
 ;; Actual parent, discounting preprocessor directives and
 ;; tree-sitter parsing issues.
 (defun my/c-parent (node)
-  (let ((real-sibling (my/c-prev-sibling node)))
-    (if (my/sibling-is-parent node real-sibling)
-        real-sibling
+  (let ((sibl (my/c-prev-sibling node)))
+    (if (my/sibling-is-parent node sibl)
+        sibl
       (let ((parent (treesit-node-parent node)))
         (if (my/preproc-node-p parent)
 	          (my/c-parent parent)
@@ -487,9 +488,9 @@
   (lambda (node parent &rest _)
     (string-match-p type (treesit-node-type (my/c-parent node)))))
 
-(defun my/real-c-parent-bol (node parent &rest _)
+(defun my/c-parent-bol (node parent &rest _)
   (save-excursion
-    (goto-char (treesit-node-start (my/real-c-parent node)))
+    (goto-char (treesit-node-start (my/c-parent node)))
     (back-to-indentation)
     (point)))
 
@@ -551,7 +552,7 @@
 
        ;; Collects all one indent relative to the parent. Note that it
        ;; needs to go below higher priority rules.
-       (my/real-c-parent-is-container my/real-c-parent-bol ,ofs)
+       (my/c-parent-is-container my/c-parent-bol ,ofs)
 
        ;; Multi-line strings
        ((parent-is "concatenated_string") first-sibling 0)
