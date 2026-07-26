@@ -424,41 +424,40 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; c-ts-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defconst my/container-types
+
+(defconst my/container-fields
     '(("if_statement" . "consequence")
       ("case_statement" . nil)
+      ("compound_statement" .nil)
       ("else_clause" . nil)
       ("for_statement" . "body")
       ("while_statement" . "body")))
 
+(defconst my/container-types
+  (map-keys my/container-fields))
+
 (defun my/preproc-node-p (node)
   (string-prefix-p "preproc" (treesit-node-type node)))
 
-(defun my/containers ()
-  (map-keys my/container-types))
-
-(defun my/containers+compound ()
-  (cons "compound_statement" (my/containers)))
-
-
 (defun my/empty-container (node)
-  (when-let* ((field (cdr (assoc (treesit-node-type node) my/container-types)))
-	      (body (treesit-node-child-by-field-name node field)))
+  (when-let* ((type (treesit-node-type node))
+              (field (cdr (assoc type my/container-fields)))
+              (body (treesit-node-child-by-field-name node field)))
     (zerop (- (treesit-node-end body) (treesit-node-start body)))))
 
-;; Closest non-preprocessor sibling.
+;; Nearest non-preprocessor sibling.
 (defun my/c-prev-sibling (node)
   (let ((s (treesit-node-prev-sibling node)))
     (if (my/preproc-node-p s)
           (my/c-prev-sibling s)
       s)))
 
-;; Sibling is actual parent if it is an empty container and there is a
-;; macro in the way.
+;; Sibling is the actual C parent if it is an empty container and
+;; there is a macro in the way.
 (defun my/sibling-is-parent (node sibling)
   (and
    sibling
-   (member (treesit-node-type sibling) (my/containers))
+   (member (treesit-node-type sibling) my/container-types)
    (my/empty-container sibling)
    (or (string-match-p "preproc_if"
 		       (treesit-node-type node))
@@ -466,33 +465,40 @@
 		       (treesit-node-type
 			(treesit-node-prev-sibling node))))))
 
-;; Actual parent, discounting preprocessor directives and
-;; tree-sitter parsing issues.
 (defun my/c-parent (node)
   (let ((sibl (my/c-prev-sibling node)))
     (if (my/sibling-is-parent node sibl)
         sibl
       (let ((parent (treesit-node-parent node)))
         (if (my/preproc-node-p parent)
-	          (my/c-parent parent)
+            (my/c-parent parent)
           parent)))))
+
+;; Figures out what the C parent of a node is by walking the tree
+;; upwards. Ignoring preprocessor macros and tree-sitter parser
+;; errors.
+(defun my/c-parent2 (node parent)
+  (let ((c-par (if node (my/c-parent node) parent)))
+    (message "c-parent of %s is %s" node c-par)
+    c-par))
 
 ;; True if the actual parent is a container
 (defun my/c-parent-is-container (node parent &rest _)
-  (member (treesit-node-type (my/c-parent node))
-          (my/containers+compound)))
+  (member (treesit-node-type (my/c-parent2 node parent))
+          my/container-types))
 
 (defun my/c-parent-is (type)
   (lambda (node parent &rest _)
-    (when-let* ((c-parent (my/c-parent node)))
-      (string-match-p type (treesit-node-type c-parent)))))
+    (when-let* ((c-par (my/c-parent2 node parent)))
+      (string-match-p type (treesit-node-type c-par)))))
 
+;; Indentation of node's C parent.
 (defun my/c-parent-bol (node parent &rest _)
   (save-excursion
-    (message "c-parent of node %s is %s" node (my/c-parent node))
-    (goto-char (treesit-node-start (my/c-parent node)))
-    (back-to-indentation)
-    (point)))
+    (let ((c-par (my/c-parent2 node parent)))
+      (goto-char (treesit-node-start c-par))
+      (back-to-indentation)
+      (point))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; My custom tree-sitter matchers
@@ -610,7 +616,6 @@
 
        ;; Collects most indent relative to the parent rules. Note that it
        ;; needs to go below higher priority rules.
-       ((parent-is "compound_statement") standalone-parent ,ofs)
        (my/c-parent-is-container my/c-parent-bol ,ofs)
 
        )
