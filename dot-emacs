@@ -424,25 +424,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; c-ts-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defconst my/container-types
+    '(("if_statement" . "consequence")
+      ("case_statement" . nil)
+      ("else_clause" . nil)
+      ("for_statement" . "body")
+      ("while_statement" . "body")))
+
 (defun my/preproc-node-p (node)
   (string-prefix-p "preproc" (treesit-node-type node)))
 
 (defun my/containers ()
-  (map-keys (my/container-fields)))
+  (map-keys my/container-types))
 
 (defun my/containers+compound ()
   (cons "compound_statement" (my/containers)))
 
-(defun my/container-fields ()
-  '(("if_statement" . "consequence")
-    ("for_statement" . "body")
-    ("while_statement" . "body")))
 
 (defun my/empty-container (node)
-  (let ((field (cdr (assoc (treesit-node-type node)
-                           (my/container-fields)))))
-    (when-let* ((body (treesit-node-child-by-field-name node field)))
-      (zerop (- (treesit-node-end body) (treesit-node-start body))))))
+  (when-let* ((field (cdr (assoc (treesit-node-type node) my/container-types)))
+	      (body (treesit-node-child-by-field-name node field)))
+    (zerop (- (treesit-node-end body) (treesit-node-start body)))))
 
 ;; Closest non-preprocessor sibling.
 (defun my/c-prev-sibling (node)
@@ -492,30 +494,57 @@
     (back-to-indentation)
     (point)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; My custom tree-sitter matchers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my/node-is-one-of (types)
   (lambda (node parent &rest _)
     (member (treesit-node-type node) types)))
 
+;; First child gets special treatment!
+(defun my/node-rank-is (parent-types min-index max-index)
+  (lambda (node parent &rest _)
+    (let ((ix (treesit-node-index node)))
+      (and (member (treesit-node-type parent) parent-types)
+           (or (not min-index)
+	       (>= ix min-index))
+	   (or (not max-index)
+	       (<= ix max-index))))))
+
+(defconst my/open-w-punctuation-types
+  '("argument_list"
+    "compound_statement"
+    "enumerator_list"
+    "field_declaration_list"
+    "initializer_list"
+    "parameter_list"
+    ))
+
+;; Children of these types are lineup-indentable
+(defconst my/lineup-indent-types
+  '("argument_list"
+    "enumerator_list"
+    "field_declaration_list"
+    "initializer_list"
+    "parameter_list"
+    "parenthesized_expression"
+    ))
+
 ;; Preprocessor directives are annoying.
 (defun my/c-ts-indent-style ()
   (let ((ofs c-ts-mode-indent-offset)
-        (half-ofs (/ c-ts-mode-indent-offset 2))
-	(list-types '("argument_list"
-		      "enumerator_list"
-		      "field_declaration_list"
-		      "initializer_list"
-		      "parameter_list"
-		      "parenthesized_expression")))
+        (half-ofs (/ c-ts-mode-indent-offset 2)))
     `((c
 
-       ;; Declarations outside of functions should generally be at column 0.
+       ;; Declarations outside of functions should generally be at
+       ;; column 0.
        ((my/c-parent-is "translation_unit") column-0 0)
        ((n-p-gp nil "declaration" "translation_unit") column-0 0)
        ((node-is "function_declarator") column-0 0)
 
        ;; Long declarations inside functions should be indented
-       ;; though.
-       ((parent-is "declaration") parent-bol ,ofs)
+       ;; though. What did I mean?
+       ;; ((parent-is "declaration") parent-bol 30)
 
        ;; Preprocessor directives should be at column 0.
        ((node-is "preproc_arg") column-0 ,ofs)
@@ -527,9 +556,28 @@
        ((node-is "}") standalone-parent 0)
        ((parent-is "\\`declaration\\'") parent-bol 0)
 
-       ;; This rule matches foo = \\nblah.
+       ;; Handles "while/for/enum\n{" Order important
+       (,(my/node-is-one-of my/open-w-punctuation-types)
+	standalone-parent 0)
+
+       ;; These rules are for "int foo = \nbar" and "int foo = bar +
+       ;; \nbaz".
        ((parent-is "assignment_expression") parent-bol ,ofs)
        ((parent-is "init_declarator") standalone-parent, ofs)
+
+       ;; Handling of binary expressions broken over multiple
+       ;; lines. In most cases, we want lineup to the first item.
+       ((n-p-gp nil "binary_expression" "argument_list")
+	parent 0)
+       ((n-p-gp nil "binary_expression" "parenthesized_expression")
+	parent 0)
+       ((n-p-gp nil "binary_expression" "binary_expression")
+	parent 0)
+       ((parent-is "binary_expression")
+	parent 0)
+
+       ;; do-whiles
+       ((n-p-gp "while" "do_statement" nil) standalone-parent 0)
 
        ;; Tertiary exprs
        ((node-is ":") (nth-sibling 1) 0)
@@ -537,8 +585,9 @@
        ;; Switch/case
        ((node-is "case") standalone-parent 0)
 
-       ;; Goto labels
+       ;; Labels are wonky in tree-sitter
        ((node-is "labeled_statement") standalone-parent ,half-ofs)
+       ((parent-is "labeled_statement") standalone-parent ,half-ofs)
 
        ;; For statements
        ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
@@ -552,27 +601,16 @@
        ((parent-is "concatenated_string") first-sibling 0)
 
        ;; Linup indentation or one-level indentation
-       (,(my/node-is-one-of list-types) parent-bol ,ofs)
-       ((match nil "enumerator_list" nil 0 1) parent-bol ,ofs)
-       ((match nil "enumerator_list" nil 2 nil) (nth-sibling 1) 0)
+       (,(my/node-is-one-of my/lineup-indent-types) standalone-parent ,ofs)
 
-       ((match nil "parameter_list" nil 0 1) parent-bol ,ofs)
-       ((match nil "parameter_list" nil 2 nil) (nth-sibling 1) 0)
+       (,(my/node-rank-is my/lineup-indent-types 0 1)
+	parent-bol ,ofs)
+       (,(my/node-rank-is my/lineup-indent-types 2 nil)
+        (nth-sibling 1) 0)
 
-       ((match nil "argument_list" nil 0 1) parent-bol ,ofs)
-       ((match nil "argument_list" nil 2 nil) (nth-sibling 1) 0)
-
-       ((match nil "initializer_list" nil 0 1) parent-bol ,ofs)
-       ((match nil "initializer_list" nil 2 nil) (nth-sibling 1) 0)
-
-       ((match nil "field_declaration_list" nil 0 1) parent-bol ,ofs)
-       ((match nil "field_declaration_list" nil 2 nil) (nth-sibling 1) 0)
-
-       ((match nil "parenthesized_expression" nil 0 1) parent-bol ,ofs)
-       ((match nil "parenthesized_expression" nil 2 nil) (nth-sibling 1) 0)
-
-       ;; Collects all one indent relative to the parent. Note that it
+       ;; Collects most indent relative to the parent rules. Note that it
        ;; needs to go below higher priority rules.
+       ((parent-is "compound_statement") standalone-parent ,ofs)
        (my/c-parent-is-container my/c-parent-bol ,ofs)
 
        )
@@ -603,6 +641,11 @@
 	'((c-mode . c-ts-mode)
 	  (c++-mode . c++-ts-mode)
 	  (c-or-c++-mode . c-or-c++-ts-mode))))
+
+(defun my/untabify-line (&rest _args)
+  (untabify (line-beginning-position) (line-end-position)))
+
+(advice-add 'indent-for-tab-command :after #'my/untabify-line)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Fixed emacs bad defaults.
@@ -691,7 +734,8 @@ by using nxml's indentation rules."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defconst my/global-keys
   '(("<delete>" delete-horizontal-space-forward)
-    ("<backspace>" backward-delete-char-untabify)
+    ;; Has to be DEL not <backspace>
+    ("DEL" backward-delete-char-untabify)
     ("C-c c" comment-dwim)
     ("C-x C-b" ibuffer)
     ("C-z" undo)
