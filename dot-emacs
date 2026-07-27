@@ -451,15 +451,12 @@
     (back-to-indentation)
     (point)))
 
-(defun ts/up-until-p (node fun)
-  (if (funcall fun node)
-      node
-    (ts/up-until-p (treesit-node-parent node) fun)))
-
 ;; Find ancestor whose type is not in skips.
 (defun ts/skip-parent (parent skips)
-  (ts/up-until-p parent (lambda (n) (not (ts/node-in n skips)))))
-
+  (treesit-parent-until
+   parent
+   (lambda (n) (not (ts/node-in n skips)))
+   t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This code finds the "actual" parent while skipping preprocessor
@@ -641,14 +638,12 @@
     (let ((skip-parent (ts/skip-parent p skip-past)))
       (ts/node-buffer-point skip-parent))))
 
-
 (defun col/actual-parent (sa)
   (lambda (node parent bol &rest _)
-    (message "col for: %s %s %s" node parent sa)
     (let* ((actual0 (my/actual-parent3 node parent bol))
 	   (actual1 (if sa
-			(ts/up-until-p actual0 #'ts/node-standalone-p)
-                      actual0)))
+			(treesit-parent-until
+			 actual0 #'ts/node-standalone-p t))))
       (ts/node-buffer-point actual1))))
 
 ;; Complicated, but pretty robust indentation rules.
