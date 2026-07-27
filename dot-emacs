@@ -558,6 +558,7 @@
     "function_declarator"
     "function_definition"
     "if_statement"
+    "init_declarator"
     "struct_specifier"
     "switch_statement"
     "while_statement"
@@ -585,6 +586,7 @@
 (defconst types/skip-past
   '("binary_expression"
     "comma_expression"
+    "concatenated_string"
     ))
 
 (defconst types/skip-to
@@ -640,7 +642,6 @@
                       actual0)))
       (ts/node-buffer-point actual1))))
 
-;; TODO: strings
 (defun my/c-ts-indent-style ()
   (let ((ofs c-ts-mode-indent-offset)
         (half-ofs (/ c-ts-mode-indent-offset 2)))
@@ -674,6 +675,7 @@
        (,(match/skip-parent types/skip-past types/skip-to)
         ,(col/skip-parent types/skip-past)
         ,ofs)
+       ((parent-is "concatenated_string") parent 0)
        ((parent-is "binary_expression") parent 0)
        ((parent-is "comma_expression") parent 0)
        ((parent-is "conditional_expression") parent 0)
