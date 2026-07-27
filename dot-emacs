@@ -434,7 +434,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; tree-sitter utilities
+;; Good to have tree-sitter utilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun ts/node-in (node types)
   (member (treesit-node-type node) types))
@@ -548,6 +548,8 @@
 ;; Tokens that "close" opened blocks
 (defconst types/closers '("}" ")" "]"))
 
+;; Opening punctuation ({ and () placed directly below these nodes is
+;; not indented.
 (defconst types/list-openers
   '("call_expression"
     "case_statement"
@@ -589,9 +591,11 @@
     "concatenated_string"
     ))
 
+;; return cond\n|| cond2;
 (defconst types/skip-to
   '("assignment_expression"
     "init_declarator"
+    "initializer_pair"
     "return_statement"
     ))
 
@@ -612,14 +616,14 @@
      (ts/node-in node n-types)
      (ts/node-in parent p-types))))
 
-(defun match/parent-and-rank (parent-types min-index max-index)
+(defun match/parent-and-rank (parent-types lo hi)
   (lambda (node parent &rest _)
     (let ((ix (treesit-node-index node)))
       (and (member (treesit-node-type parent) parent-types)
-           (or (not min-index)
-	       (>= ix min-index))
-	   (or (not max-index)
-	       (<= ix max-index))))))
+           (or (not lo)
+	       (>= ix lo))
+	   (or (not hi)
+	       (<= ix hi))))))
 
 (defun match/skip-parent (skip-past skip-to)
   (lambda (node p &rest _)
@@ -694,11 +698,9 @@
        ;; if
        ((node-is "else_clause") parent-bol 0)
 
-
        ;; Labels are wonky in tree-sitter
        ((node-is "labeled_statement") standalone-parent ,half-ofs)
        ((parent-is "labeled_statement") standalone-parent ,half-ofs)
-
 
        ;; Handles children of blocks (P0)
        (,(match/actual-parent types/blocks) (col/actual-parent t) ,ofs)
@@ -730,6 +732,8 @@
 	'((c-mode . c-ts-mode)
 	  (c++-mode . c++-ts-mode)
 	  (c-or-c++-mode . c-or-c++-ts-mode))))
+
+
 
 (defun my/untabify-line (&rest _args)
   (untabify (line-beginning-position) (line-end-position)))
