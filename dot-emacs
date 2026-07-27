@@ -120,10 +120,11 @@
 (use-package dired
   :init
   (setq dired-kill-when-opening-new-dired-buffer t)
-  (setq dired-listing-switches "-agloA --group-directories-first")
+  (setq dired-listing-switches "-goAv --group-directories-first")
+  (setq dired-omit-files "^\\.\\|~$")
   :bind (:map dired-mode-map
               ("h" . dired-up-directory)
-              ("l" . dired-find-file))
+	      ("H" . dired-omit-mode))
   :hook ((dired-mode . (lambda() (load "dired-x"))))
   )
 
