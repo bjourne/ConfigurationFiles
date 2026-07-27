@@ -434,7 +434,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Good to have tree-sitter utilities
+;; Tree-sitter utilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun ts/node-in (node types)
   (member (treesit-node-type node) types))
@@ -451,23 +451,29 @@
     (back-to-indentation)
     (point)))
 
-(defun ts/up-until-ok (node fun)
+(defun ts/up-until-p (node fun)
   (if (funcall fun node)
       node
-    (ts/up-until-ok (treesit-node-parent node) fun)))
+    (ts/up-until-p (treesit-node-parent node) fun)))
 
+;; Find ancestor whose type is not in skips.
 (defun ts/skip-parent (parent skips)
-  (ts/up-until-ok parent (lambda (n) (not (ts/node-in n skips)))))
+  (ts/up-until-p parent (lambda (n) (not (ts/node-in n skips)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; JUST for the "actual" parent system
+;; This code finds the "actual" parent while skipping preprocessor
+;; macros and gracefully handling tree-sitter-c parser bugs.
+;;
+;; my/actual-parent and my/actual-parent3 can directly substitute
+;; treesit-node-parent node in many cases.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; case_statement is also buggy but too difficult to hande.
 (defconst my/buggy-container-fields
-    '(("if_statement" . "consequence")
-      ("for_statement" . "body")
-      ("while_statement" . "body")))
+  '(("if_statement" . "consequence")
+    ("for_statement" . "body")
+    ("while_statement" . "body")))
 
 (defconst my/buggy-container-types
   (map-keys my/buggy-container-fields))
@@ -488,30 +494,28 @@
         (my/actual-prev-sibling s)
       s)))
 
-(defun my/sibling-is-parent-of (node sibling)
+(defun my/sibling-is-parent-of (sibl node)
   (and
-   sibling
-   (member (treesit-node-type sibling) my/buggy-container-types)
-   (my/buggy-empty-container-p sibling)
+   sibl
+   (member (treesit-node-type sibl) my/buggy-container-types)
+   (my/buggy-empty-container-p sibl)
    (or (my/preproc-node-p node)
        (my/preproc-node-p (treesit-node-prev-sibling node)))))
-
-(defun my/actual-parent (node)
-  (let ((sibl (my/actual-prev-sibling node)))
-    (if (my/sibling-is-parent-of node sibl)
-        sibl
-      (let ((parent (treesit-node-parent node)))
-        (if (my/preproc-node-p parent)
-            (my/actual-parent parent)
-          parent)))))
 
 (defun my/actual-node-at (node parent bol)
   (or node
       (treesit-node-prev-sibling
        (treesit-node-first-child-for-pos parent bol))))
 
-;; The point of this function is ONLY to patch up tree-sitter parse
-;; errors and to skip preprocessor macros.
+(defun my/actual-parent (node)
+  (let ((sibl (my/actual-prev-sibling node)))
+    (if (my/sibling-is-parent-of sibl node)
+        sibl
+      (let ((parent (treesit-node-parent node)))
+        (if (my/preproc-node-p parent)
+            (my/actual-parent parent)
+          parent)))))
+
 (defun my/actual-parent3 (node parent bol)
   (let* ((node-at (my/actual-node-at node parent bol))
          (actual-parent (my/actual-parent node-at)))
@@ -600,7 +604,8 @@
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Matchers and column getters, prefixes match and col
+;; match/-prefixed functions match the parse, and col/-prefixed are
+;; for getting node start columns.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun match/actual-parent (types)
   (lambda (node parent bol &rest _)
@@ -642,10 +647,11 @@
     (message "col for: %s %s %s" node parent sa)
     (let* ((actual0 (my/actual-parent3 node parent bol))
 	   (actual1 (if sa
-			(ts/up-until-ok actual0 #'ts/node-standalone-p)
+			(ts/up-until-p actual0 #'ts/node-standalone-p)
                       actual0)))
       (ts/node-buffer-point actual1))))
 
+;; Complicated, but pretty robust indentation rules.
 (defun my/c-ts-indent-style ()
   (let ((ofs c-ts-mode-indent-offset)
         (half-ofs (/ c-ts-mode-indent-offset 2)))
@@ -658,7 +664,7 @@
        ;; This "retracts" opening symbols
        (,(match/node-any types/closers) standalone-parent 0)
 
-       ;; Pushing most nodes outside of functions to column 0 (LP).
+       ;; Pushing most nodes outside of functions to column 0 (P2).
        (,(match/actual-parent types/column-0) column-0 0)
        ((n-p-gp nil "declaration" "translation_unit") column-0 0)
        ((node-is "function_declarator") column-0 0)
@@ -688,7 +694,7 @@
        ((n-p-gp "while" "do_statement" nil) standalone-parent 0)
 
        ;; Switch/case. Change 0 to ,ofs if u like indented cases.
-       ((node-is "case") standalone-parent 0)
+       ((node-is "case") (col/actual-parent t) 0)
 
        ;; for: lineup
        ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
@@ -707,8 +713,6 @@
        )
       ))
   )
-
-
 
 (defun my/c-ts-mode-hook ()
   (c-ts-mode-toggle-comment-style -1)
