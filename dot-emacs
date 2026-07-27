@@ -422,103 +422,148 @@
                             (c-set-offset 'arglist-intro '+)
                             (c-set-offset 'class-close -1)))
 
+(defun reload-major-mode ()
+  "Reload the current major mode, reapplying settings and hooks."
+  (interactive)
+  (let ((mode major-mode))
+    (funcall mode)))
+(global-set-key (kbd "C-c m") #'reload-major-mode)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; c-ts-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defconst my/container-fields
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; tree-sitter utilities
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun ts/node-in (node types)
+  (member (treesit-node-type node) types))
+
+(defun ts/node-standalone-p (node)
+  (save-excursion
+    (goto-char (treesit-node-start node))
+    (looking-back (rx bol (* whitespace))
+                  (line-beginning-position))))
+
+(defun ts/node-buffer-point (node)
+  (save-excursion
+    (goto-char (treesit-node-start node))
+    (back-to-indentation)
+    (point)))
+
+(defun ts/up-until-ok (node fun)
+  (if (funcall fun node)
+      node
+    (ts/up-until-ok (treesit-node-parent node) fun)))
+
+(defun ts/skip-parent (parent skips)
+  (ts/up-until-ok parent (lambda (n) (not (ts/node-in n skips)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; JUST for the "actual" parent system
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defconst my/buggy-container-fields
     '(("if_statement" . "consequence")
-      ("case_statement" . nil)
-      ("compound_statement" .nil)
-      ("else_clause" . nil)
       ("for_statement" . "body")
       ("while_statement" . "body")))
 
-(defconst my/container-types
-  (map-keys my/container-fields))
+(defconst my/buggy-container-types
+  (map-keys my/buggy-container-fields))
+
+(defun my/buggy-empty-container-p (node)
+  (when-let* ((type (treesit-node-type node))
+              (field (cdr (assoc type my/buggy-container-fields)))
+              (body (treesit-node-child-by-field-name node field)))
+    (zerop (- (treesit-node-end body)
+	      (treesit-node-start body)))))
 
 (defun my/preproc-node-p (node)
   (string-prefix-p "preproc" (treesit-node-type node)))
 
-(defun my/empty-container (node)
-  (when-let* ((type (treesit-node-type node))
-              (field (cdr (assoc type my/container-fields)))
-              (body (treesit-node-child-by-field-name node field)))
-    (zerop (- (treesit-node-end body) (treesit-node-start body)))))
-
-;; Nearest non-preprocessor sibling.
-(defun my/c-prev-sibling (node)
+(defun my/actual-prev-sibling (node)
   (let ((s (treesit-node-prev-sibling node)))
     (if (my/preproc-node-p s)
-          (my/c-prev-sibling s)
+        (my/actual-prev-sibling s)
       s)))
 
-;; Sibling is the actual C parent if it is an empty container and
-;; there is a macro in the way.
-(defun my/sibling-is-parent (node sibling)
+(defun my/sibling-is-parent-of (node sibling)
   (and
    sibling
-   (member (treesit-node-type sibling) my/container-types)
-   (my/empty-container sibling)
-   (or (string-match-p "preproc_if"
-		       (treesit-node-type node))
-       (string-match-p "preproc_def"
-		       (treesit-node-type
-			(treesit-node-prev-sibling node))))))
+   (member (treesit-node-type sibling) my/buggy-container-types)
+   (my/buggy-empty-container-p sibling)
+   (or (my/preproc-node-p node)
+       (my/preproc-node-p (treesit-node-prev-sibling node)))))
 
-(defun my/c-parent (node)
-  (let ((sibl (my/c-prev-sibling node)))
-    (if (my/sibling-is-parent node sibl)
+(defun my/actual-parent (node)
+  (let ((sibl (my/actual-prev-sibling node)))
+    (if (my/sibling-is-parent-of node sibl)
         sibl
       (let ((parent (treesit-node-parent node)))
         (if (my/preproc-node-p parent)
-            (my/c-parent parent)
+            (my/actual-parent parent)
           parent)))))
 
-;; Figures out what the C parent of a node is by walking the tree
-;; upwards. Ignoring preprocessor macros and tree-sitter parser
-;; errors.
-(defun my/c-parent2 (node parent)
-  (let ((c-par (if node (my/c-parent node) parent)))
-    (message "c-parent of %s is %s" node c-par)
-    c-par))
+(defun my/actual-node-at (node parent bol)
+  (or node
+      (treesit-node-prev-sibling
+       (treesit-node-first-child-for-pos parent bol))))
 
-;; True if the actual parent is a container
-(defun my/c-parent-is-container (node parent &rest _)
-  (member (treesit-node-type (my/c-parent2 node parent))
-          my/container-types))
+;; The point of this function is ONLY to patch up tree-sitter parse
+;; errors and to skip preprocessor macros.
+(defun my/actual-parent3 (node parent bol)
+  (let* ((node-at (my/actual-node-at node parent bol))
+         (actual-parent (my/actual-parent node-at)))
+    (message "%s -> %s" node-at actual-parent)
+    actual-parent))
 
-(defun my/c-parent-is (type)
-  (lambda (node parent &rest _)
-    (when-let* ((c-par (my/c-parent2 node parent)))
-      (string-match-p type (treesit-node-type c-par)))))
-
-;; Indentation of node's C parent.
-(defun my/c-parent-bol (node parent &rest _)
-  (save-excursion
-    (let ((c-par (my/c-parent2 node parent)))
-      (goto-char (treesit-node-start c-par))
-      (back-to-indentation)
-      (point))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; My custom tree-sitter matchers
+;; Node categories
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun my/node-is-one-of (types)
-  (lambda (node parent &rest _)
-    (member (treesit-node-type node) types)))
+(defconst types/blocks
+  '("case_statement"
+    "compound_statement"
+    "else_clause"
+    "if_statement"
+    "for_statement"
+    "return_statement"
+    "while_statement"
+    ))
 
-;; First child gets special treatment!
-(defun my/node-rank-is (parent-types min-index max-index)
-  (lambda (node parent &rest _)
-    (let ((ix (treesit-node-index node)))
-      (and (member (treesit-node-type parent) parent-types)
-           (or (not min-index)
-	       (>= ix min-index))
-	   (or (not max-index)
-	       (<= ix max-index))))))
+(defconst types/column-0
+  '("translation_unit"))
 
-(defconst my/open-w-punctuation-types
+(defconst types/macros
+  '("#endif"
+    "preproc_call"
+    "preproc_def"
+    "preproc_else"
+    "preproc_if"
+    "preproc_ifdef"
+    "preproc_include"
+    ))
+
+;; Tokens that "close" opened blocks
+(defconst types/closers '("}" ")" "]"))
+
+(defconst types/list-openers
+  '("call_expression"
+    "case_statement"
+    "do_statement"
+    "else_clause"
+    "enum_specifier"
+    "for_statement"
+    "function_declarator"
+    "function_definition"
+    "if_statement"
+    "struct_specifier"
+    "switch_statement"
+    "while_statement"
+    ))
+
+(defconst types/list-likes
   '("argument_list"
     "compound_statement"
     "enumerator_list"
@@ -527,8 +572,7 @@
     "parameter_list"
     ))
 
-;; Children of these types are lineup-indentable
-(defconst my/lineup-indent-types
+(defconst types/lineup-indentable
   '("argument_list"
     "enumerator_list"
     "field_declaration_list"
@@ -537,88 +581,125 @@
     "parenthesized_expression"
     ))
 
-;; Preprocessor directives are annoying.
+;; These do not affect indentation of expressions
+(defconst types/skip-past
+  '("binary_expression"
+    "comma_expression"
+    ))
+
+(defconst types/skip-to
+  '("assignment_expression"
+    "init_declarator"
+    "return_statement"
+    ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Matchers and column getters, prefixes match and col
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun match/actual-parent (types)
+  (lambda (node parent bol &rest _)
+    (ts/node-in (my/actual-parent3 node parent bol) types)))
+
+(defun match/node-any (types)
+  (lambda (node parent &rest _)
+    (ts/node-in node types)))
+
+(defun match/n-p-any (n-types p-types)
+  (lambda (node parent &rest _)
+    (and
+     (ts/node-in node n-types)
+     (ts/node-in parent p-types))))
+
+(defun match/parent-and-rank (parent-types min-index max-index)
+  (lambda (node parent &rest _)
+    (let ((ix (treesit-node-index node)))
+      (and (member (treesit-node-type parent) parent-types)
+           (or (not min-index)
+	       (>= ix min-index))
+	   (or (not max-index)
+	       (<= ix max-index))))))
+
+(defun match/skip-parent (skip-past skip-to)
+  (lambda (node p &rest _)
+    (let ((skip-parent (ts/skip-parent p skip-past)))
+      (message "node %s skips to %s" node skip-parent)
+      (ts/node-in skip-parent skip-to))))
+
+(defun col/skip-parent (skip-past)
+  (lambda (n p bol &rest _)
+    (let ((skip-parent (ts/skip-parent p skip-past)))
+      (ts/node-buffer-point skip-parent))))
+
+
+(defun col/actual-parent (sa)
+  (lambda (node parent bol &rest _)
+    (message "col for: %s %s %s" node parent sa)
+    (let* ((actual0 (my/actual-parent3 node parent bol))
+	   (actual1 (if sa
+			(ts/up-until-ok actual0 #'ts/node-standalone-p)
+                      actual0)))
+      (ts/node-buffer-point actual1))))
+
+;; TODO: strings
 (defun my/c-ts-indent-style ()
   (let ((ofs c-ts-mode-indent-offset)
         (half-ofs (/ c-ts-mode-indent-offset 2)))
     `((c
 
-       ;; Declarations outside of functions should generally be at
-       ;; column 0.
-       ((my/c-parent-is "translation_unit") column-0 0)
+       ;; Preprocessor directives should be at column (P6)
+       ((node-is "preproc_arg") column-0 ,ofs)
+       (,(match/node-any types/macros) column-0 0)
+
+       ;; This "retracts" opening symbols
+       (,(match/node-any types/closers) standalone-parent 0)
+
+       ;; Pushing most nodes outside of functions to column 0 (LP).
+       (,(match/actual-parent types/column-0) column-0 0)
        ((n-p-gp nil "declaration" "translation_unit") column-0 0)
        ((node-is "function_declarator") column-0 0)
 
-       ;; Long declarations inside functions should be indented
-       ;; though. What did I mean?
-       ;; ((parent-is "declaration") parent-bol 30)
+       ;; A list-like directly below a list-opener should not be
+       ;; indented (P5).
+       (,(match/n-p-any types/list-likes types/list-openers)
+	(col/actual-parent t) 0)
 
-       ;; Preprocessor directives should be at column 0.
-       ((node-is "preproc_arg") column-0 ,ofs)
-       ((node-is "preproc") column-0 0)
-       ((node-is "#endif") column-0 0)
+       ;; Context-dependent lineup or block-indentation (P4)
+       (,(match/parent-and-rank types/lineup-indentable 0 1)
+        parent-bol ,ofs)
+       (,(match/parent-and-rank types/lineup-indentable 2 nil)
+        (nth-sibling 1) 0)
+       (,(match/node-any types/lineup-indentable) standalone-parent ,ofs)
 
-       ;; Like "retract"
-       ((node-is ")") parent-bol 0)
-       ((node-is "}") standalone-parent 0)
-       ((parent-is "\\`declaration\\'") parent-bol 0)
-
-       ;; Handles "while/for/enum\n{" Order important
-       (,(my/node-is-one-of my/open-w-punctuation-types)
-	standalone-parent 0)
-
-       ;; These rules are for "int foo = \nbar" and "int foo = bar +
-       ;; \nbaz".
-       ((parent-is "assignment_expression") parent-bol ,ofs)
-       ((parent-is "init_declarator") standalone-parent, ofs)
-
-       ;; Handling of binary expressions broken over multiple
-       ;; lines. In most cases, we want lineup to the first item.
-       ((n-p-gp nil "binary_expression" "argument_list")
-	parent 0)
-       ((n-p-gp nil "binary_expression" "parenthesized_expression")
-	parent 0)
-       ((n-p-gp nil "binary_expression" "binary_expression")
-	parent 0)
-       ((parent-is "binary_expression")
-	parent 0)
+       ;; Kludges for binary expressions (P2)
+       (,(match/skip-parent types/skip-past types/skip-to)
+        ,(col/skip-parent types/skip-past)
+        ,ofs)
+       ((parent-is "binary_expression") parent 0)
+       ((parent-is "comma_expression") parent 0)
+       ((parent-is "conditional_expression") parent 0)
 
        ;; do-whiles
        ((n-p-gp "while" "do_statement" nil) standalone-parent 0)
 
-       ;; Tertiary exprs
-       ((node-is ":") (nth-sibling 1) 0)
-
-       ;; Switch/case
+       ;; Switch/case. Change 0 to ,ofs if u like indented cases.
        ((node-is "case") standalone-parent 0)
+
+       ;; for: lineup
+       ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
+       ((query "(for_statement condition: (_) @indent)") parent-bol 5)
+       ((query "(for_statement update: (_) @indent)") parent-bol 5)
+
+       ;; if
+       ((node-is "else_clause") parent-bol 0)
+
 
        ;; Labels are wonky in tree-sitter
        ((node-is "labeled_statement") standalone-parent ,half-ofs)
        ((parent-is "labeled_statement") standalone-parent ,half-ofs)
 
-       ;; For statements
-       ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
-       ((query "(for_statement condition: (_) @indent)") parent-bol 5)
-       ((query "(for_statement update: (_) @indent)") parent-bol 5)
 
-       ;; If statements
-       ((node-is "else") parent-bol 0)
-
-       ;; Multi-line strings
-       ((parent-is "concatenated_string") first-sibling 0)
-
-       ;; Linup indentation or one-level indentation
-       (,(my/node-is-one-of my/lineup-indent-types) standalone-parent ,ofs)
-
-       (,(my/node-rank-is my/lineup-indent-types 0 1)
-	parent-bol ,ofs)
-       (,(my/node-rank-is my/lineup-indent-types 2 nil)
-        (nth-sibling 1) 0)
-
-       ;; Collects most indent relative to the parent rules. Note that it
-       ;; needs to go below higher priority rules.
-       (my/c-parent-is-container my/c-parent-bol ,ofs)
-
+       ;; Handles children of blocks (P0)
+       (,(match/actual-parent types/blocks) (col/actual-parent t) ,ofs)
        )
       ))
   )
