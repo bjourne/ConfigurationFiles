@@ -10,7 +10,7 @@
 ;; XDG-compliant way. This must be first for the rest of the config to
 ;; work.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq config-base "~/.config/emacs/")
+(defconst config-base "~/.config/emacs/")
 (setq package-user-dir (concat config-base "packages/"))
 (setq package-gnupghome-dir (concat config-base "gnupg/"))
 
@@ -25,7 +25,7 @@
 
 (defun fun-call-infrequently (fun dur)
   (let* ((name (prin1-to-string fun))
-	 (path (concat "~/.cache/emacs/fun-cookie-" name))
+	 (path (concat "~/.cache/emacs/" "fun-cookie-" name))
 	 (expiry (string-to-number (f-read-text-safe path "0")))
 	 (now (time-convert nil 'integer)))
     (if (> now expiry)
@@ -38,7 +38,6 @@
 ;; Package manager initialization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'package)
-
 ;; Add MELPA repos
 (nconc package-archives
        '(("melpa" . "https://melpa.org/packages/")
@@ -519,6 +518,14 @@
     (message "%s -> %s" node-at actual-parent)
     actual-parent))
 
+(defun my/actual-index (node)
+  "Like treesit-node-index but skips macros."
+  (let ((count 0))
+    (while (setq node (treesit-node-prev-sibling node))
+      (when (not (my/preproc-node-p node))
+        (incf count)))
+    count))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Node categories
@@ -564,6 +571,7 @@
     "init_declarator"
     "struct_specifier"
     "switch_statement"
+    "union_specifier"
     "while_statement"
     ))
 
@@ -588,13 +596,19 @@
 ;; These do not affect indentation of expressions
 (defconst types/skip-past
   '("binary_expression"
+    "cast_expression"
     "comma_expression"
     "concatenated_string"
+    "field_expression"
+    "pointer_expression"
     ))
 
 ;; return cond\n|| cond2;
 (defconst types/skip-to
   '("assignment_expression"
+    ;; Not sure whether it should be included or not.
+    ;;"compound_statement"
+    "expression_statement"
     "init_declarator"
     "initializer_pair"
     "return_statement"
@@ -620,7 +634,7 @@
 
 (defun match/parent-and-rank (parent-types lo hi)
   (lambda (node parent &rest _)
-    (let ((ix (treesit-node-index node)))
+    (let ((ix (my/actual-index node)))
       (and (member (treesit-node-type parent) parent-types)
            (or (not lo)
 	       (>= ix lo))
@@ -652,29 +666,49 @@
         (half-ofs (/ c-ts-mode-indent-offset 2)))
     `((c
 
-       ;; Preprocessor directives should be at column (P6)
+       ;; Preprocessor directives should be at column (P8)
        ((node-is "preproc_arg") column-0 ,ofs)
        (,(match/node-any types/macros) column-0 0)
 
        ;; This "retracts" opening symbols
        (,(match/node-any types/closers) standalone-parent 0)
 
-       ;; Pushing most nodes outside of functions to column 0 (P2).
+       ;; Pushing most nodes outside of functions to column 0 (P7).
        (,(match/actual-parent types/column-0) column-0 0)
        ((n-p-gp nil "declaration" "translation_unit") column-0 0)
        ((node-is "function_declarator") column-0 0)
 
-       ;; A list-like directly below a list-opener should not be
-       ;; indented (P5).
+       ;; A list-like below a list-opener should not be
+       ;; indented (P6).
        (,(match/n-p-any types/list-likes types/list-openers)
-	(col/actual-parent t) 0)
+        (col/actual-parent t) 0)
 
-       ;; Context-dependent lineup or block-indentation (P4)
+
+       ;; Context-dependent lineup or block-indentation (P5)
+       ;; Does not work if there are macros in the way
        (,(match/parent-and-rank types/lineup-indentable 0 1)
         parent-bol ,ofs)
        (,(match/parent-and-rank types/lineup-indentable 2 nil)
         (nth-sibling 1) 0)
-       (,(match/node-any types/lineup-indentable) standalone-parent ,ofs)
+
+       ;; Switch/case. Change 0 to ,ofs if u like indented cases (P4).
+       ((node-is "case") (col/actual-parent t) 0)
+
+       ;; Labels are wonky in tree-sitter (P3)
+       ((node-is "labeled_statement") standalone-parent ,half-ofs)
+       ((parent-is "labeled_statement") standalone-parent ,half-ofs)
+       ((parent-is "goto_statement") standalone-parent ,ofs)
+
+       ;; Rule interferes with others.
+       ;;(,(match/node-any types/lineup-indentable) standalone-parent ,ofs)
+
+       ;; Block comments
+       ((and (parent-is "comment") c-ts-common-looking-at-star)
+        c-ts-common-comment-start-after-first-star -1)
+       (c-ts-common-comment-2nd-line-matcher
+        c-ts-common-comment-2nd-line-anchor
+        1)
+       ((parent-is "comment") prev-adaptive-prefix 0)
 
        ;; Kludges for binary expressions (P2)
        (,(match/skip-parent types/skip-past types/skip-to)
@@ -684,12 +718,11 @@
        ((parent-is "binary_expression") parent 0)
        ((parent-is "comma_expression") parent 0)
        ((parent-is "conditional_expression") parent 0)
+       ((parent-is "field_expression") parent 0)
+       ((parent-is "pointer_expression") parent 0)
 
        ;; do-whiles
-       ((n-p-gp "while" "do_statement" nil) standalone-parent 0)
-
-       ;; Switch/case. Change 0 to ,ofs if u like indented cases.
-       ((node-is "case") (col/actual-parent t) 0)
+       ((n-p-gp "while" "do_statement" nil) parent 0)
 
        ;; for: lineup
        ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
@@ -699,9 +732,7 @@
        ;; if
        ((node-is "else_clause") parent-bol 0)
 
-       ;; Labels are wonky in tree-sitter
-       ((node-is "labeled_statement") standalone-parent ,half-ofs)
-       ((parent-is "labeled_statement") standalone-parent ,half-ofs)
+
 
        ;; Handles children of blocks (P0)
        (,(match/actual-parent types/blocks) (col/actual-parent t) ,ofs)
