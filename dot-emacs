@@ -660,6 +660,24 @@
 			 actual0 #'ts/node-standalone-p t))))
       (ts/node-buffer-point actual1))))
 
+
+(defun col/inside-comments (_n parent bol &rest _)
+  "Indentation offset for lines in block comments.
+
+One space if line starts with \"*\", three if the previous line is blank
+or the first line of the comment, and otherwise same as previous line."
+  (save-excursion
+    (beginning-of-line)
+    (let* ((c-point (treesit-node-start parent))
+	   (starred? (looking-at-p (rx (* blank) "*")))
+	   (first-or-second? (<= (line-beginning-position 0) c-point)))
+      (forward-line -1)
+      (let ((prev-indent (current-indentation)))
+        (cond (starred? 1)
+              ((or first-or-second? (= prev-indent 0)) 3)
+              (t (- prev-indent (progn (goto-char c-point)
+                                       (current-column)))))))))
+
 ;; Complicated, but pretty robust indentation rules.
 (defun my/c-ts-indent-style ()
   (let ((ofs c-ts-mode-indent-offset)
@@ -699,16 +717,11 @@
        ((parent-is "labeled_statement") standalone-parent ,half-ofs)
        ((parent-is "goto_statement") standalone-parent ,ofs)
 
-       ;; Rule interferes with others.
+       ;;Rule interferes with others.
        ;;(,(match/node-any types/lineup-indentable) standalone-parent ,ofs)
 
        ;; Block comments
-       ((and (parent-is "comment") c-ts-common-looking-at-star)
-        c-ts-common-comment-start-after-first-star -1)
-       (c-ts-common-comment-2nd-line-matcher
-        c-ts-common-comment-2nd-line-anchor
-        1)
-       ((parent-is "comment") prev-adaptive-prefix 0)
+       ((parent-is "comment") parent col/inside-comments)
 
        ;; Kludges for binary expressions (P2)
        (,(match/skip-parent types/skip-past types/skip-to)
