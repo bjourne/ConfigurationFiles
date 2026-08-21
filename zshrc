@@ -58,7 +58,7 @@ export PATH="$HOME/.local/bin:$PATH"
 export ZSH="$HOME/.config/oh-my-zsh"
 
 
-export ZSH_THEME="bureau"
+export ZSH_THEME="funky"
 
 set +e +u
 source $ZSH/oh-my-zsh.sh

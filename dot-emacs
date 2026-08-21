@@ -45,7 +45,7 @@
 
 (setq package-check-signature nil)
 (package-initialize)
-(fun-call-infrequently #'package-refresh-contents 86400)
+(fun-call-infrequently #'package-refresh-contents 172800)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup config
@@ -754,22 +754,27 @@ or the first line of the comment, and otherwise same as previous line."
   )
 
 (defun my/c-ts-mode-hook ()
+  (message "c-ts-mode: hook is running")
   (c-ts-mode-toggle-comment-style -1)
   (setq-local whitespace-style '(tabs tab-mark))
   (setq-local whitespace-display-mappings
 	      '((tab-mark 9 [187 9] [92 9])))
   (setq-local indent-tabs-mode nil)
+  (setq-local tab-width 4)
+  (setq-local c-ts-mode-indent-offset 4)
+  ;; Renamed in v32
+  (setq-local c-ts-indent-offset 4)
   (whitespace-mode))
 
 (use-package c-ts-mode
   :if (and (fboundp 'treesit-language-available-p)
            (treesit-language-available-p 'c))
   :custom
-  (c-ts-mode-indent-offset 4)
   (c-ts-mode-indent-style #'my/c-ts-indent-style)
+  ;;:init (add-hook 'c-ts-mode-hook #'my/c-ts-mode-hook)
   ;; I have NO IDEA why you need to quote the c-ts-mode symbol.
-  :hook
-  ('c-ts-mode . #'my/c-ts-mode-hook)
+  ;; :hook
+  :hook ('c-ts-mode . #'my/c-ts-mode-hook)
   :config
   (setq major-mode-remap-alist
 	'((c-mode . c-ts-mode)
@@ -781,7 +786,7 @@ or the first line of the comment, and otherwise same as previous line."
 (defun my/untabify-line (&rest _args)
   (untabify (line-beginning-position) (line-end-position)))
 
-(advice-add 'indent-for-tab-command :after #'my/untabify-line)
+;;(advice-add 'indent-for-tab-command :after #'my/untabify-line)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Fixed emacs bad defaults.
@@ -1139,7 +1144,7 @@ by using nxml's indentation rules."
    ;; Fallback to host name if /proc/cpuinfo can't be read.
    (t (system-name))))
 
-;; Inconsolata with italic and bold variants:
+;; Inconsoloata with italic and bold variants:
 ;;    https://github.com/MihailJP/Inconsolata-LGC
 ;; Comic Mono:
 ;;    https://github.com/dtinth/comic-mono-font
