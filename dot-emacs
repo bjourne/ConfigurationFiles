@@ -751,38 +751,41 @@ or the first line of the comment, and otherwise same as previous line."
       ))
   )
 
-(defun my/indent-and-untabify (&rest _args)
+(defun my/indent-and-untabify ()
   (treesit-indent)
   (untabify (line-beginning-position) (line-end-position)))
 
-(defun my/c-ts-mode-hook ()
+(defun my/c-ts-mode-setup ()
   (message "c-ts-mode: hook is running")
   (c-ts-mode-toggle-comment-style -1)
-  (setq-local whitespace-style '(tabs tab-mark))
-  (setq-local whitespace-display-mappings
-	      '((tab-mark 9 [187 9] [92 9])))
-  (setq-local indent-tabs-mode nil)
-  (setq-local tab-width 4)
-  (setq-local c-ts-mode-indent-offset 4)
-  ;; Renamed in v32
-  (setq-local c-ts-indent-offset 4)
-
   ;; Replace tabs with spaces
-  (setq-local indent-line-function #'my/indent-and-untabify)
-  (whitespace-mode))
+  (setq-local indent-tabs-mode nil
+              indent-line-function #'my/indent-and-untabify
+              tab-width 4
+              whitespace-style '(tabs tab-mark))
+
+  (whitespace-mode 1))
 
 (use-package c-ts-mode
   :if (and (fboundp 'treesit-language-available-p)
            (treesit-language-available-p 'c))
+
+  ;; Mode remappings should be declared before the mode is loaded.
+  :init
+  (dolist (m '((c-mode . c-ts-mode)
+               (c++-mode . c++-ts-mode)
+               (c-or-c++-mode . c-or-c++-ts-mode)))
+    (add-to-list 'major-mode-remap-alist m))
+
   :custom
+  (c-ts-indent-offset 4)
+  ;; Added in v32
+  (c-ts-mode-indent-offset 4)
+
   (c-ts-mode-indent-style #'my/c-ts-indent-style)
+
   ;; I have NO IDEA why you need to quote the c-ts-mode symbol.
-  :hook ('c-ts-mode . #'my/c-ts-mode-hook)
-  :config
-  (setq major-mode-remap-alist
-	'((c-mode . c-ts-mode)
-	  (c++-mode . c++-ts-mode)
-	  (c-or-c++-mode . c-or-c++-ts-mode))))
+  :hook ('c-ts-mode . #'my/c-ts-mode-setup))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto saving backups. Fixed emacs bad defaults.
