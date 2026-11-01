@@ -25,9 +25,12 @@
 
 (defun fun-call-infrequently (fun dur)
   (let* ((name (prin1-to-string fun))
-	 (path (concat "~/.cache/emacs/" "fun-cookie-" name))
+	 (dir "~/.cache/emacs/")
+	 (path (concat dir "fun-cookie-" name))
 	 (expiry (string-to-number (f-read-text-safe path "0")))
 	 (now (time-convert nil 'integer)))
+    (unless (f-exists-p dir)
+      (make-directory dir))
     (if (> now expiry)
       (progn
         (funcall fun)
