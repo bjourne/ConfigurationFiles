@@ -1183,7 +1183,8 @@ by using nxml's indentation rules."
   (list (device-identity) (user-login-name)))
 
 (defun device-config ()
-  (cdr (assoc (config-key) device-configs)))
+  (cdr (or (assoc (config-key) device-configs)
+	   (assoc nil device-configs))))
 
 ;; Theme, possibly a different init should be used on windows.
 (global-font-lock-mode t)
